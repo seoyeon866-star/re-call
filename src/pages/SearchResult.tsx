@@ -109,11 +109,15 @@ export default function SearchResult() {
   const [recallMap, setRecallMap] = useState<Map<string, RecallItem[]>>(new Map());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [sortBy, setSortBy] = useState<'relevance' | 'latest'>('relevance');
+  const [filterRecallOnly, setFilterRecallOnly] = useState(false);
 
   useEffect(() => {
     if (!query) return;
     setLoading(true);
     setError('');
+    setSortBy('relevance');
+    setFilterRecallOnly(false);
 
     searchProducts(query)
       .then(async (products) => {
@@ -157,11 +161,29 @@ export default function SearchResult() {
 
   const items = useMemo(() => {
     const deduped = deduplicateNaverItems(naverItems);
-    return deduped.map((item) => {
+    let result = deduped.map((item) => {
       const recalls = recallMap.get(item.productId) || [];
-      return { item, recalls, recallCount: recalls.length };
+      const latestRecallDate = recalls.reduce((latest, r) => {
+        return r.recallRegDt && r.recallRegDt > latest ? r.recallRegDt : latest;
+      }, '');
+      return { item, recalls, recallCount: recalls.length, latestRecallDate };
     });
-  }, [naverItems, recallMap]);
+
+    if (filterRecallOnly) {
+      result = result.filter((r) => r.recallCount > 0);
+    }
+
+    if (sortBy === 'latest') {
+      result.sort((a, b) => {
+        if (a.recallCount === 0 && b.recallCount === 0) return 0;
+        if (a.recallCount === 0) return 1;
+        if (b.recallCount === 0) return -1;
+        return (b.latestRecallDate || '').localeCompare(a.latestRecallDate || '');
+      });
+    }
+
+    return result;
+  }, [naverItems, recallMap, sortBy, filterRecallOnly]);
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
@@ -175,6 +197,37 @@ export default function SearchResult() {
 
       {!loading && !error && items.length === 0 && (
         <p>검색 결과가 없습니다.</p>
+      )}
+
+      {!loading && !error && items.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', marginBottom: '16px', padding: '10px 12px', background: '#f9f9f9', borderRadius: '8px', fontSize: '0.9rem' }}>
+          <span style={{ color: '#666', whiteSpace: 'nowrap' }}>총 {items.length}개 검색 결과</span>
+          <div style={{ flex: 1, minWidth: 0 }} />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as 'relevance' | 'latest')}
+            style={{
+              padding: '6px 10px',
+              borderRadius: '6px',
+              border: '1px solid #ccc',
+              fontSize: '0.85rem',
+              background: '#fff',
+              cursor: 'pointer',
+            }}
+          >
+            <option value="relevance">관련도순</option>
+            <option value="latest">최신순</option>
+          </select>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <input
+              type="checkbox"
+              checked={filterRecallOnly}
+              onChange={(e) => setFilterRecallOnly(e.target.checked)}
+              style={{ cursor: 'pointer' }}
+            />
+            리콜 이력 있는 제품만
+          </label>
+        </div>
       )}
 
       <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
