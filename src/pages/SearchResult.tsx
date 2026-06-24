@@ -59,10 +59,36 @@ function matchesProduct(recall: RecallItem, product: NaverShopItem): boolean {
   const rModel = clean(recall.modlNmInfo)
   const rMakr = clean(recall.makr)
 
-  if (rName && title.includes(rName)) return true
-  if (rModel && rModel.length >= 3 && title.includes(rModel)) return true
-  if (rMakr && rMakr.length >= 2 && title.includes(rMakr)) return true
-  if (brand && rName && rName.includes(brand)) return true
+  const titleWords = new Set(title.split(/\s+/).filter(w => w.length >= 2))
+
+  // Brand check: if product has a brand, recall must reference it as a whole word
+  if (brand && brand.length >= 2) {
+    const recallText = [rName, rModel, rMakr].filter(Boolean).join(' ')
+    const recallWords = recallText.split(/\s+/)
+    if (!recallWords.some(w => w === brand)) return false
+  }
+
+  // Recall name: at least 2 significant words must match in product title
+  if (rName && rName.length >= 3) {
+    const recallWords = rName.split(/\s+/).filter(w => w.length >= 2)
+    const matched = recallWords.filter(w => titleWords.has(w)).length
+    if (matched >= 2) return true
+    if (matched === 1 && recallWords.length === 1 && recallWords[0].length >= 4) {
+      const genericWords = new Set(['보조배터리', '충전기', '케이블', '이어폰', '헤드폰', '마우스', '키보드', '파워뱅크', '완구류', '유아용품'])
+      if (!genericWords.has(recallWords[0])) return true
+    }
+    return false
+  }
+
+  // Model: direct match in title
+  if (rModel && rModel.length >= 4 && title.includes(rModel)) return true
+
+  // Manufacturer: at least 2 words in common
+  if (rMakr && rMakr.length >= 3) {
+    const makrWords = rMakr.split(/\s+/).filter(w => w.length >= 2)
+    const matched = makrWords.filter(w => titleWords.has(w)).length
+    if (matched >= 2) return true
+  }
 
   return false
 }
