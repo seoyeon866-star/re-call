@@ -1,6 +1,17 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+const RECOMMENDED_KEYWORDS = [
+  '휴대용 선풍기',
+  '모기 퇴치제',
+  '완구류',
+  '고속 충전기',
+  '보조배터리',
+  '유아용품',
+  '전기장판',
+  '물놀이용품',
+];
+
 export default function Home() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
@@ -52,6 +63,37 @@ export default function Home() {
           검색
         </button>
       </form>
+      <div style={{ marginTop: '32px' }}>
+        <p style={{ fontSize: '0.85rem', color: '#888', marginBottom: '12px' }}>추천 검색어</p>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '8px', maxWidth: '480px', margin: '0 auto' }}>
+          {RECOMMENDED_KEYWORDS.map((keyword) => (
+            <button
+              key={keyword}
+              onClick={() => navigate(`/search?query=${encodeURIComponent(keyword)}`)}
+              style={{
+                padding: '8px 16px',
+                borderRadius: '20px',
+                border: '1px solid #ddd',
+                background: '#fff',
+                fontSize: '0.85rem',
+                color: '#333',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#54B8DB';
+                e.currentTarget.style.color = '#54B8DB';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#ddd';
+                e.currentTarget.style.color = '#333';
+              }}
+            >
+              {keyword}
+            </button>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
