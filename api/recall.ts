@@ -14,9 +14,6 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const tokens = keyword.split(/\s+/).filter(Boolean);
-    const searchTerms = [keyword, ...tokens].filter((v, i, a) => a.indexOf(v) === i);
-
     const fetchConsumer = async (term: string) => {
       const url = new URL('https://www.consumer.go.kr/openapi/recall/contents/index.do');
       url.searchParams.set('serviceKey', process.env.CONSUMER24_SERVICE_KEY!);
@@ -33,7 +30,7 @@ export default async function handler(req: any, res: any) {
       return xmlParser.parse(text);
     };
 
-    const rawResults = await Promise.all(searchTerms.map(fetchConsumer));
+    const rawResults = await Promise.all([keyword].map(fetchConsumer));
 
     const seen = new Set<string>();
     const merged: Record<string, unknown>[] = [];

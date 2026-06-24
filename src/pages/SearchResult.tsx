@@ -31,13 +31,40 @@ function deduplicateNaverItems(items: NaverShopItem[]): NaverShopItem[] {
   return [...uniqueMap.values()]
 }
 
+function clean(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣\s]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
 function extractKeyword(item: NaverShopItem, fallback: string): string {
   if (item.brand && item.brand.trim()) {
     return item.brand.trim()
   }
-  const clean = item.title.replace(/<[^>]*>/g, '').trim()
-  const parts = clean.split(/[\s,|\-/(/[]+/).filter(Boolean)
-  return parts.slice(0, 2).join(' ') || fallback
+  const title = clean(item.title)
+  const genericWords = new Set(['보조배터리', '충전기', '케이블', '이어폰', '헤드폰', '마우스', '키보드', '파워뱅크', '기내반입', '고속충전', '미니', '휴대용', '대용량', '초고속', 'c타입', '8핀'])
+  const parts = title.split(/\s+/).filter(Boolean)
+  const specific = parts.find(p => p.length >= 2 && !genericWords.has(p))
+  return specific || parts[0] || fallback
+}
+
+function matchesProduct(recall: RecallItem, product: NaverShopItem): boolean {
+  const title = clean(product.title)
+  const brand = clean(product.brand)
+
+  const rName = clean(recall.productNm)
+  const rModel = clean(recall.modlNmInfo)
+  const rMakr = clean(recall.makr)
+
+  if (rName && title.includes(rName)) return true
+  if (rModel && rModel.length >= 3 && title.includes(rModel)) return true
+  if (rMakr && rMakr.length >= 2 && title.includes(rMakr)) return true
+  if (brand && rName && rName.includes(brand)) return true
+
+  return false
 }
 
 function RecallBadge({ count }: { count: number }) {
@@ -101,8 +128,19 @@ export default function SearchResult() {
           products.map(async (product) => {
             const keyword = extractKeyword(product, query);
             try {
-              const recalls = await searchRecalls(keyword);
-              return { productId: product.productId, recalls };
+              const rawRecalls = await searchRecalls(keyword);
+              const matched = rawRecalls.filter(r => matchesProduct(r, product));
+
+              if (matched.length > 0) {
+                console.log('--- 상품 매칭 ---');
+                console.log('상품명:', product.title.replace(/<[^>]*>/g, ''));
+                matched.forEach(r => {
+                  console.log('매칭된 리콜:', r.productNm, r.modlNmInfo || '', `(${r.recallSe || ''})`);
+                });
+                console.log('최종 카운트:', matched.length);
+              }
+
+              return { productId: product.productId, recalls: matched };
             } catch {
               return { productId: product.productId, recalls: [] as RecallItem[] };
             }
