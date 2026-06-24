@@ -23,7 +23,7 @@ export default function ProductDetail() {
 
   if (!data) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
+      <div style={{ padding: '40px 16px', textAlign: 'center' }}>
         <p>상품 정보를 불러올 수 없습니다.</p>
         <Link to="/search" style={{ color: '#54B8DB' }}>검색 결과로 돌아가기</Link>
       </div>
@@ -35,26 +35,36 @@ export default function ProductDetail() {
     const hasRecall = recalls.length > 0;
 
     return (
-      <div style={{ maxWidth: '720px', margin: '40px auto', padding: '0 20px' }}>
-        <Link to="/search" style={{ textDecoration: 'none', color: '#54B8DB', display: 'inline-block', marginBottom: '24px' }}>
+      <div style={{ maxWidth: '720px', margin: '0 auto', padding: '24px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
+        <Link to="/search" style={{ textDecoration: 'none', color: '#54B8DB', display: 'inline-block', marginBottom: '20px' }}>
           &larr; 검색 결과로 돌아가기
         </Link>
 
-        <div style={{ display: 'flex', gap: '24px', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '28px' }}>
           <img
             src={item.image}
             alt={item.title}
-            width={240}
-            height={240}
-            style={{ objectFit: 'cover', borderRadius: '12px', flexShrink: 0 }}
+            style={{
+              width: '100%',
+              maxWidth: '320px',
+              aspectRatio: '1/1',
+              objectFit: 'cover',
+              borderRadius: '12px',
+              alignSelf: 'center',
+            }}
           />
-          <div style={{ flex: 1 }}>
-            <h1 style={{ margin: '0 0 8px', fontSize: '1.5rem' }} dangerouslySetInnerHTML={{ __html: item.title }} />
-            {item.brand && <p style={{ margin: '0 0 4px', color: '#555' }}>제조사: {item.brand}</p>}
-            {item.mallName && <p style={{ margin: '0 0 4px', color: '#888' }}>판매처: {item.mallName}</p>}
-            {item.lprice && <p style={{ margin: '0 0 12px', fontSize: '1.25rem', fontWeight: 700 }}>
-              {Number(item.lprice).toLocaleString()}원
-            </p>}
+          <div style={{ minWidth: 0 }}>
+            <h1
+              style={{ margin: '0 0 8px', fontSize: 'clamp(1.2rem, 5vw, 1.5rem)', wordBreak: 'break-word' }}
+              dangerouslySetInnerHTML={{ __html: item.title }}
+            />
+            {item.brand && <p style={{ margin: '0 0 4px', color: '#555', fontSize: '0.9rem' }}>제조사: {item.brand}</p>}
+            {item.mallName && <p style={{ margin: '0 0 4px', color: '#888', fontSize: '0.9rem' }}>판매처: {item.mallName}</p>}
+            {item.lprice && (
+              <p style={{ margin: '0 0 12px', fontSize: 'clamp(1.1rem, 4vw, 1.25rem)', fontWeight: 700, wordBreak: 'break-word' }}>
+                {Number(item.lprice).toLocaleString()}원
+              </p>
+            )}
             <span
               style={{
                 display: 'inline-block',
@@ -73,16 +83,19 @@ export default function ProductDetail() {
 
         {hasRecall && (
           <div>
-            <h2 style={{ fontSize: '1.2rem', marginBottom: '16px' }}>리콜 상세 정보</h2>
+            <h2 style={{ fontSize: 'clamp(1.1rem, 4vw, 1.2rem)', marginBottom: '14px' }}>리콜 상세 정보</h2>
             {recalls.map((r, i) => (
               <div
                 key={r.recallSn || i}
                 style={{
-                  padding: '16px',
-                  marginBottom: '12px',
+                  padding: '14px',
+                  marginBottom: '10px',
                   borderRadius: '10px',
                   border: '1px solid #e0e0e0',
                   background: '#fafafa',
+                  fontSize: '0.9rem',
+                  wordBreak: 'break-word',
+                  overflowWrap: 'break-word',
                 }}
               >
                 {r.productNm && <p style={{ margin: '4px 0' }}><strong>제품명:</strong> {r.productNm}</p>}
@@ -103,7 +116,7 @@ export default function ProductDetail() {
                       href={`https://www.consumer24.go.kr/portal/issue/issueDetail.ibo?cntntsId=${r.cntntsId}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ color: '#54B8DB' }}
+                      style={{ color: '#54B8DB', wordBreak: 'break-all' }}
                     >
                       소비자24 바로가기
                     </a>
@@ -119,12 +132,12 @@ export default function ProductDetail() {
 
   const { productName, items } = data;
   return (
-    <div style={{ maxWidth: '720px', margin: '40px auto', padding: '0 20px' }}>
-      <Link to="/search" style={{ textDecoration: 'none', color: '#54B8DB', display: 'inline-block', marginBottom: '24px' }}>
+    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '24px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
+      <Link to="/search" style={{ textDecoration: 'none', color: '#54B8DB', display: 'inline-block', marginBottom: '20px' }}>
         &larr; 검색 결과로 돌아가기
       </Link>
 
-      <h1 style={{ margin: '0 0 24px', fontSize: '1.5rem' }}>{productName}</h1>
+      <h1 style={{ margin: '0 0 20px', fontSize: 'clamp(1.2rem, 5vw, 1.5rem)', wordBreak: 'break-word' }}>{productName}</h1>
 
       <span
         style={{
@@ -135,7 +148,7 @@ export default function ProductDetail() {
           fontWeight: 600,
           background: '#FCEBEA',
           color: '#E63429',
-          marginBottom: '24px',
+          marginBottom: '20px',
         }}
       >
         리콜 이력 {items.length}건
@@ -146,11 +159,14 @@ export default function ProductDetail() {
           <div
             key={r.recallSn || i}
             style={{
-              padding: '16px',
-              marginBottom: '12px',
+              padding: '14px',
+              marginBottom: '10px',
               borderRadius: '10px',
               border: '1px solid #e0e0e0',
               background: '#fafafa',
+              fontSize: '0.9rem',
+              wordBreak: 'break-word',
+              overflowWrap: 'break-word',
             }}
           >
             {r.productNm && <p style={{ margin: '4px 0' }}><strong>제품명:</strong> {r.productNm}</p>}
@@ -171,7 +187,7 @@ export default function ProductDetail() {
                   href={`https://www.consumer24.go.kr/portal/issue/issueDetail.ibo?cntntsId=${r.cntntsId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  style={{ color: '#54B8DB' }}
+                  style={{ color: '#54B8DB', wordBreak: 'break-all' }}
                 >
                   소비자24 바로가기
                 </a>
