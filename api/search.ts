@@ -6,8 +6,9 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
+    const display = req.query?.display || '100';
     const apiRes = await fetch(
-      `https://openapi.naver.com/v1/search/shop.json?query=${encodeURIComponent(query)}&display=20`,
+      `https://openapi.naver.com/v1/search/shop.json?query=${encodeURIComponent(query)}&display=${display}`,
       {
         headers: {
           'X-Naver-Client-Id': process.env.VITE_NAVER_CLIENT_ID!,

@@ -15,9 +15,14 @@ export interface NaverShopItem {
   category4: string
 }
 
-export async function searchProducts(query: string): Promise<NaverShopItem[]> {
+export interface NaverSearchResult {
+  total: number
+  items: NaverShopItem[]
+}
+
+export async function searchProducts(query: string): Promise<NaverSearchResult> {
   const { data } = await axios.get('/api/search', {
-    params: { query },
+    params: { query, display: 100 },
   })
-  return data.items
+  return { total: data.total || 0, items: data.items || [] }
 }

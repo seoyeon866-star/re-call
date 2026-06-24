@@ -107,6 +107,7 @@ export default function SearchResult() {
   const query = searchParams.get('query') || '';
   const [naverItems, setNaverItems] = useState<NaverShopItem[]>([]);
   const [recallMap, setRecallMap] = useState<Map<string, RecallItem[]>>(new Map());
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [sortBy, setSortBy] = useState<'relevance' | 'latest'>('relevance');
@@ -120,16 +121,17 @@ export default function SearchResult() {
     setFilterRecallOnly(false);
 
     searchProducts(query)
-      .then(async (products) => {
-        setNaverItems(products);
+      .then(async ({ items, total }) => {
+        setNaverItems(items);
+        setTotalCount(total);
 
-        if (products.length === 0) {
+        if (items.length === 0) {
           setLoading(false);
           return;
         }
 
         const results = await Promise.all(
-          products.map(async (product) => {
+          items.map(async (product) => {
             const keyword = extractKeyword(product, query);
             try {
               const rawRecalls = await searchRecalls(keyword);
@@ -185,6 +187,11 @@ export default function SearchResult() {
     return result;
   }, [naverItems, recallMap, sortBy, filterRecallOnly]);
 
+  const recallCount = useMemo(() => {
+    const deduped = deduplicateNaverItems(naverItems);
+    return deduped.filter((item) => (recallMap.get(item.productId) || []).length > 0).length;
+  }, [naverItems, recallMap]);
+
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', display: 'inline-block', marginBottom: '16px' }}>
@@ -200,8 +207,15 @@ export default function SearchResult() {
       )}
 
       {!loading && !error && items.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px', marginBottom: '16px', padding: '10px 12px', background: '#f9f9f9', borderRadius: '8px', fontSize: '0.9rem' }}>
-          <span style={{ color: '#666', whiteSpace: 'nowrap' }}>총 {items.length}개 검색 결과</span>
+        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '16px', padding: '10px 12px', background: '#f9f9f9', borderRadius: '8px', fontSize: '0.9rem' }}>
+          <span style={{ color: '#666', whiteSpace: 'nowrap' }}>
+            검색 결과 {totalCount.toLocaleString()}개
+            {recallCount > 0 && (
+              <span style={{ color: '#E63429', marginLeft: '6px' }}>
+                · 리콜 상품 {recallCount}개 발견
+              </span>
+            )}
+          </span>
           <div style={{ flex: 1, minWidth: 0 }} />
           <select
             value={sortBy}
