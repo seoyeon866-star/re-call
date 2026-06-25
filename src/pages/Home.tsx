@@ -134,7 +134,7 @@ export default function Home() {
             <p style={{ color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', padding: '32px 0' }}>리콜 정보를 불러올 수 없습니다.</p>
           )}
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
-            {recentRecalls.slice(0, 5).map((item) => {
+            {recentRecalls.filter(item => getRecallImages(item).length > 0).slice(0, 5).map((item) => {
               const images = getRecallImages(item)
               return (
               <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(130px, 38vw, 170px)' }}>
