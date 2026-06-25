@@ -29,18 +29,19 @@ export default async function handler(req: any, res: any) {
   try {
     const supabaseUrl = process.env.SUPABASE_URL || '';
     const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-
     const ref = supabaseUrl.replace('https://', '').replace('.supabase.co', '');
-    const regions = ['ap-southeast-1', 'us-east-1', 'ap-northeast-1', 'eu-west-1'];
 
-    let migrated = false;
-    let lastErr = '';
+    const targets: { host: string; port: number }[] = [];
+    for (const region of ['ap-southeast-1', 'us-east-1', 'ap-northeast-1', 'eu-west-1']) {
+      for (const port of [5432, 6543]) {
+        targets.push({ host: `aws-0-${region}.pooler.supabase.com`, port });
+      }
+    }
 
-    for (const region of regions) {
+    for (const { host, port } of targets) {
       try {
         const client = new Client({
-          host: `aws-0-${region}.pooler.supabase.com`,
-          port: 6543,
+          host, port,
           database: 'postgres',
           user: `postgres.${ref}`,
           password: serviceKey,
@@ -50,18 +51,13 @@ export default async function handler(req: any, res: any) {
         await client.connect();
         await client.query(migrationSQL);
         await client.end();
-        migrated = true;
-        break;
+        return res.json({ success: true, message: `Migration done via ${host}:${port}` });
       } catch (e: any) {
-        lastErr = e.message;
+        continue;
       }
     }
 
-    if (migrated) {
-      res.json({ success: true, message: 'Migration completed successfully' });
-    } else {
-      res.status(500).json({ success: false, error: lastErr || 'Could not connect to database' });
-    }
+    res.status(500).json({ success: false, error: 'Could not connect to database on any endpoint' });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }

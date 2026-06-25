@@ -7,9 +7,15 @@ const xmlParser = new XMLParser({
   isArray: (name) => name === 'item',
 });
 
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || '';
-const supabase = createClient(supabaseUrl, supabaseKey);
+let _supabase: any = null;
+function getSupabase() {
+  if (!_supabase) {
+    const url = process.env.SUPABASE_URL;
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (url && key) _supabase = createClient(url, key);
+  }
+  return _supabase;
+}
 
 const CATEGORY_RULES: { category: string; keywords: string[] }[] = [
   { category: '유아동', keywords: ['유아', '신생아', '아기', '베이비', '이유식', '유모차', '젖병', '턱받이', '아동', '키즈', '분유', '기저귀', '물티슈', '어린이', '돌보기', '교육', '완구', '장난감', '딸랑이', '치발기', '보행기', '캐리어', '아가'] },
@@ -100,53 +106,69 @@ async function fetchFromConsumer(keyword: string) {
 }
 
 async function upsertRecall(row: any) {
-  const { error } = await supabase.from('recalls').upsert(row, { onConflict: 'recall_sn' });
+  const sb = getSupabase();
+  if (!sb) return;
+  const { error } = await sb.from('recalls').upsert(row, { onConflict: 'recall_sn' });
   if (error) console.error('[Upsert error]', error.message);
+}
+
+async function queryFromDB(column: string, value: string) {
+  const sb = getSupabase();
+  if (!sb) return null;
+  const { data, error } = await sb
+    .from('recalls')
+    .select('*')
+    .eq(column, value)
+    .order('recall_reg_dt', { ascending: false, nullsFirst: false })
+    .limit(100);
+  if (error) throw error;
+  return data ? data.map(toClient) : [];
 }
 
 export default async function handler(req: any, res: any) {
   try {
     const { q, category, recent } = req.query || {};
 
-    // Category browse: query Supabase directly
+    // Category browse: try DB, fall back to broad Consumer24 fetch + classify
     if (category) {
-      const { data, error } = await supabase
-        .from('recalls')
-        .select('*')
-        .eq('category', category)
-        .order('recall_reg_dt', { ascending: false, nullsFirst: false })
-        .limit(100);
-      if (error) throw error;
-      return res.json({ items: (data || []).map(toClient), source: 'db' });
-    }
-
-    // Recent recalls: query Supabase
-    if (recent === 'true') {
-      const { data, error } = await supabase
-        .from('recalls')
-        .select('*')
-        .order('recall_reg_dt', { ascending: false, nullsFirst: false })
-        .limit(100);
-      if (error) throw error;
-      if (data && data.length > 0) {
-        return res.json({ items: data.map(toClient), source: 'db' });
-      }
-      // Fallback: fetch from Consumer24
+      const fromDb = await queryFromDB('category', category);
+      if (fromDb) return res.json({ items: fromDb, source: 'db' });
       const raw = await fetchFromConsumer('');
-      const rows = raw.map(toRow);
-      await Promise.all(rows.map(upsertRecall));
+      const rows = raw.map(toRow).filter(r => r.category === category);
+      Promise.all(rows.map(upsertRecall)).catch(() => {});
       return res.json({ items: rows.map(toClient), source: 'consumer24' });
     }
 
-    // Keyword search: fetch from Consumer24, classify, upsert, return
+    // Recent recalls: try DB, fall back to Consumer24
+    if (recent === 'true') {
+      const fromDb = await queryFromDB('recall_sn', ''); // dummy — just check if DB is available
+      if (fromDb) {
+        const sb = getSupabase();
+        if (sb) {
+          const { data, error } = await sb
+            .from('recalls')
+            .select('*')
+            .order('recall_reg_dt', { ascending: false, nullsFirst: false })
+            .limit(100);
+          if (!error && data && data.length > 0) {
+            return res.json({ items: data.map(toClient), source: 'db' });
+          }
+        }
+      }
+      const raw = await fetchFromConsumer('');
+      const rows = raw.map(toRow);
+      Promise.all(rows.map(upsertRecall)).catch(() => {});
+      return res.json({ items: rows.map(toClient), source: 'consumer24' });
+    }
+
+    // Keyword search: fetch from Consumer24, classify, upsert in background
     if (!q) {
       return res.status(400).json({ error: 'Missing query parameter (q, category, or recent)' });
     }
 
     const raw = await fetchFromConsumer(q);
     const rows = raw.map(toRow);
-    // Upsert in background — don't block response
-    Promise.all(rows.map(upsertRecall)).catch(err => console.error('[Bg upsert]', err));
+    Promise.all(rows.map(upsertRecall)).catch(() => {});
     return res.json({ items: rows.map(toClient), source: 'consumer24' });
   } catch (err: any) {
     console.error('[Recalls API]', err);
