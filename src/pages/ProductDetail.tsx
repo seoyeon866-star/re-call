@@ -1,7 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import { getRecallImages, fetchByCategory, type RecallItem } from '../api/consumerRecall'
+import { getRecallImages } from '../api/consumerRecall'
 import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
+
+interface AltProduct {
+  title: string
+  link: string
+  image: string
+  lprice: string
+  brand: string
+  maker: string
+  mallName: string
+}
 
 function InfoRow({ label, value }: { label: string; value: string }) {
   if (!value || value === '-') return null
@@ -15,23 +25,22 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 export default function ProductDetail() {
   const location = useLocation()
-  const data = location.state as { items: RecallItem[]; fromQuery?: string } | null
+  const data = location.state as { items: any[]; fromQuery?: string } | null
 
-  const [altItems, setAltItems] = useState<RecallWithMeta[]>([])
+  const [altItems, setAltItems] = useState<AltProduct[]>([])
 
   const item: RecallWithMeta | null = data?.items?.[0]
     ? buildRecallWithMeta(data.items[0])
     : null
 
   useEffect(() => {
-    if (!item || !item.category || item.category === '기타') return
-    fetchByCategory(item.category)
-      .then(items => {
-        const filtered = items
-          .filter(i => i.recallSn !== item.recallSn)
-          .slice(0, 10)
-          .map(buildRecallWithMeta)
-        setAltItems(filtered)
+    if (!item) return
+    const name = item.productNm
+    if (!name) return
+    fetch(`/api/alternatives?productNm=${encodeURIComponent(name)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.items) setAltItems(data.items)
       })
       .catch(() => {})
   }, [item?.recallSn])
@@ -132,26 +141,24 @@ export default function ProductDetail() {
       {altItems.length > 0 && (
         <div style={{ padding: '24px 16px 32px' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 4px' }}>대체상품 추천</h2>
-          <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 16px' }}>같은 카테고리의 다른 리콜 상품을 확인해보세요.</p>
+          <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 16px' }}>리콜 이력이 없는 유사 상품입니다.</p>
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
-            {altItems.slice(0, 6).map(alt => {
-              const altImages = getRecallImages(alt)
-              return (
-                <Link key={alt.recallSn} to={`/recall/${alt.recallSn}`} state={{ items: [alt] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(120px, 35vw, 160px)' }}>
-                  <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>
-                    <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>
-                      {altImages.length > 0 ? (
-                        <img src={altImages[0]} alt={alt.productNm} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : '?'}
-                    </div>
-                    <div style={{ padding: '10px' }}>
-                      <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{alt.productNm}</p>
-                      <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '8px', fontSize: '0.68rem', fontWeight: 600, background: '#FEF2F2', color: '#ef4444' }}>리콜 있음</span>
-                    </div>
+            {altItems.slice(0, 6).map((alt, idx) => (
+              <a key={idx} href={alt.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(120px, 35vw, 160px)' }}>
+                <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>
+                  <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>
+                    {alt.image ? (
+                      <img src={alt.image} alt={alt.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : '?'}
                   </div>
-                </Link>
-              )
-            })}
+                  <div style={{ padding: '10px' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{alt.title}</p>
+                    <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '8px', fontSize: '0.68rem', fontWeight: 600, background: '#dcfce7', color: '#16a34a' }}>리콜이력없음</span>
+                    {alt.lprice && <span style={{ display: 'block', marginTop: '4px', fontSize: '0.75rem', color: '#64748b' }}>{Number(alt.lprice).toLocaleString()}원</span>}
+                  </div>
+                </div>
+              </a>
+            ))}
           </div>
         </div>
       )}
