@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS recalls (
   cnsmr_ghvr_tips TEXT,
   aditfield13 TEXT,
   recall_reg_dt TEXT,
-  category TEXT NOT NULL,
+  category TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 

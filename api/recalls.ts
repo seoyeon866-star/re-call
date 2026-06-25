@@ -105,6 +105,49 @@ async function fetchFromConsumer(keyword: string) {
     : [];
 }
 
+function hasImage(row: any) {
+  return row.recall_img_urls && row.recall_img_urls.trim().length > 0;
+}
+
+function applyImageFilter(query: any) {
+  return query.not('recall_img_urls', 'is', null).neq('recall_img_urls', '');
+}
+
+async function queryDBRecent() {
+  const sb = getSupabase();
+  if (!sb) return null;
+  try {
+    const q = applyImageFilter(sb.from('recalls').select('*'));
+    const { data, error } = await q.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100);
+    if (error) throw error;
+    return data && data.length > 0 ? data.map(toClient) : null;
+  } catch { return null; }
+}
+
+async function queryDBCategory(category: string) {
+  const sb = getSupabase();
+  if (!sb) return null;
+  try {
+    const q = applyImageFilter(sb.from('recalls').select('*').eq('category', category));
+    const { data, error } = await q.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100);
+    if (error) throw error;
+    return data && data.length > 0 ? data.map(toClient) : null;
+  } catch { return null; }
+}
+
+async function queryDBSearch(q: string) {
+  const sb = getSupabase();
+  if (!sb) return null;
+  try {
+    const query = applyImageFilter(
+      sb.from('recalls').select('*').or(`product_nm.ilike.%${q}%,makr.ilike.%${q}%,bsnm_nm.ilike.%${q}%`)
+    );
+    const { data, error } = await query.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100);
+    if (error) throw error;
+    return data && data.length > 0 ? data.map(toClient) : null;
+  } catch { return null; }
+}
+
 async function upsertRecall(row: any) {
   const sb = getSupabase();
   if (!sb) return;
@@ -112,66 +155,40 @@ async function upsertRecall(row: any) {
   if (error) console.error('[Upsert error]', error.message);
 }
 
-async function queryFromDB(column: string, value: string) {
-  const sb = getSupabase();
-  if (!sb) return null;
-  try {
-    const { data, error } = await sb
-      .from('recalls')
-      .select('*')
-      .eq(column, value)
-      .order('recall_reg_dt', { ascending: false, nullsFirst: false })
-      .limit(100);
-    if (error) throw error;
-    return data ? data.map(toClient) : [];
-  } catch {
-    return null;
-  }
-}
-
 export default async function handler(req: any, res: any) {
   try {
     const { q, category, recent } = req.query || {};
 
-    // Category browse: try DB, fall back to broad Consumer24 fetch + classify
+    // Category browse: DB → Consumer24 fallback
     if (category) {
-      const fromDb = await queryFromDB('category', category);
+      const fromDb = await queryDBCategory(category);
       if (fromDb) return res.json({ items: fromDb, source: 'db' });
       const raw = await fetchFromConsumer('');
-      const rows = raw.map(toRow).filter(r => r.category === category);
+      let rows = raw.map(toRow).filter(r => r.category === category && hasImage(r));
       Promise.all(rows.map(upsertRecall)).catch(() => {});
       return res.json({ items: rows.map(toClient), source: 'consumer24' });
     }
 
-    // Recent recalls: try DB, fall back to Consumer24
+    // Recent recalls: DB → Consumer24 fallback
     if (recent === 'true') {
-      const fromDb = await queryFromDB('recall_sn', ''); // dummy — just check if DB is available
-      if (fromDb) {
-        const sb = getSupabase();
-        if (sb) {
-          const { data, error } = await sb
-            .from('recalls')
-            .select('*')
-            .order('recall_reg_dt', { ascending: false, nullsFirst: false })
-            .limit(100);
-          if (!error && data && data.length > 0) {
-            return res.json({ items: data.map(toClient), source: 'db' });
-          }
-        }
-      }
+      const fromDb = await queryDBRecent();
+      if (fromDb) return res.json({ items: fromDb, source: 'db' });
       const raw = await fetchFromConsumer('');
-      const rows = raw.map(toRow);
+      let rows = raw.map(toRow).filter(hasImage);
       Promise.all(rows.map(upsertRecall)).catch(() => {});
       return res.json({ items: rows.map(toClient), source: 'consumer24' });
     }
 
-    // Keyword search: fetch from Consumer24, classify, upsert in background
+    // Keyword search: DB → Consumer24 fallback
     if (!q) {
       return res.status(400).json({ error: 'Missing query parameter (q, category, or recent)' });
     }
 
+    const fromDb = await queryDBSearch(q);
+    if (fromDb) return res.json({ items: fromDb, source: 'db' });
+
     const raw = await fetchFromConsumer(q);
-    const rows = raw.map(toRow);
+    let rows = raw.map(toRow).filter(hasImage);
     Promise.all(rows.map(upsertRecall)).catch(() => {});
     return res.json({ items: rows.map(toClient), source: 'consumer24' });
   } catch (err: any) {
