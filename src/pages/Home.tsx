@@ -106,8 +106,8 @@ export default function Home() {
           </section>
         )}
 
+        <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 12px' }}>카테고리</h3>
         <section style={{ marginBottom: '28px', background: '#fff', borderRadius: '16px', padding: '24px' }}>
-          <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 16px' }}>카테고리</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '16px 8px' }}>
             {CATEGORIES.map(cat => (
               <button key={cat} onClick={() => handleCategoryClick(cat)} style={{
