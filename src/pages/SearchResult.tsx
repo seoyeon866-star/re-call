@@ -69,7 +69,7 @@ export default function SearchResult() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
         <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '1.2rem' }}>&larr;</Link>
         <h2 style={{ margin: 0, fontSize: 'clamp(1rem, 4vw, 1.2rem)', fontWeight: 600, color: '#1e293b', wordBreak: 'break-word' }}>
-          {isCategoryMode ? `${category}` : `&ldquo;${query}&rdquo; 검색 결과`}
+          {isCategoryMode ? category : `"${query}" 검색 결과`}
         </h2>
       </div>
 

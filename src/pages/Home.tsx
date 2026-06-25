@@ -17,7 +17,7 @@ const CATEGORY_ICONS: Record<string, string> = {
   '생활용품': '/assets/category/생활용품.png',
   '욕실용품': '/assets/category/욕실용품.png',
   '주방용품': '/assets/category/주방용품.png',
-  '반려동물용품': '/assets/category/반려동물.png',
+  '반려동물 용품': '/assets/category/반려동물.png',
 }
 
 function getRecentSearches(): string[] {
