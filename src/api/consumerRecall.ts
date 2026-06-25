@@ -18,6 +18,11 @@ export interface RecallItem {
   recallRegDt?: string
 }
 
+export function getRecallImages(item: RecallItem): string[] {
+  if (!item.recallImgUrls) return []
+  return item.recallImgUrls.split(',').map(s => s.trim()).filter(Boolean)
+}
+
 function extractItems(raw: Record<string, unknown>): RecallItem[] {
   if (!raw) return []
 

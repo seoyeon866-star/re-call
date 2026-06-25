@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { fetchRecentRecalls } from '../api/consumerRecall'
+import { fetchRecentRecalls, getRecallImages } from '../api/consumerRecall'
 import { buildRecallWithMeta, CATEGORIES, type RecallWithMeta } from '../lib/classify'
 
 const RECENT_SEARCHES_KEY = 'recent_searches'
@@ -108,18 +108,31 @@ export default function Home() {
         {loading && <p style={{ color: '#999', fontSize: '0.85rem' }}>로딩 중...</p>}
         {!loading && recentRecalls.length === 0 && <p style={{ color: '#999', fontSize: '0.85rem' }}>리콜 정보를 불러올 수 없습니다.</p>}
         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-          {recentRecalls.slice(0, 10).map((item) => (
+          {recentRecalls.slice(0, 10).map((item) => {
+            const images = getRecallImages(item)
+            return (
             <li key={item.recallSn} style={{ borderBottom: '1px solid #eee', padding: '10px 0' }}>
-              <Link to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.9rem', wordBreak: 'break-word' }}>{item.productNm}</p>
-                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                  {item.makr && item.makr !== '-' && <span style={{ fontSize: '0.8rem', color: '#888' }}>{item.makr}</span>}
-                  <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#e8f4f8', color: '#54B8DB' }}>{item.category}</span>
-                  {item.recallRegDt && <span style={{ fontSize: '0.75rem', color: '#aaa' }}>{item.recallRegDt?.slice(0, 10)}</span>}
+              <Link to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '10px', alignItems: 'flex-start' }}>
+                {images.length > 0 && (
+                  <img
+                    src={images[0]}
+                    alt={item.productNm}
+                    style={{ width: '56px', height: '56px', objectFit: 'cover', borderRadius: '6px', flexShrink: 0 }}
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+                  />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.9rem', wordBreak: 'break-word' }}>{item.productNm}</p>
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {item.makr && item.makr !== '-' && <span style={{ fontSize: '0.8rem', color: '#888' }}>{item.makr}</span>}
+                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#e8f4f8', color: '#54B8DB' }}>{item.category}</span>
+                    {item.recallRegDt && <span style={{ fontSize: '0.75rem', color: '#aaa' }}>{item.recallRegDt?.slice(0, 10)}</span>}
+                  </div>
                 </div>
               </Link>
             </li>
-          ))}
+            )
+          })}
         </ul>
       </section>
     </div>

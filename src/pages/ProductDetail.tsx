@@ -1,5 +1,6 @@
 import { useLocation, Link } from 'react-router-dom'
 import type { RecallItem } from '../api/consumerRecall'
+import { getRecallImages } from '../api/consumerRecall'
 import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
 
 interface RecallDetailData {
@@ -31,9 +32,19 @@ export default function ProductDetail() {
         리콜 이력 {items.length}건
       </span>
 
-      {items.map((item, i) => (
+      {items.map((item, i) => {
+        const images = getRecallImages(item)
+        return (
         <div key={item.recallSn || i} style={{ padding: '16px', marginBottom: '12px', borderRadius: '10px', border: '1px solid #e0e0e0', background: '#fafafa', fontSize: '0.9rem', wordBreak: 'break-word', overflowWrap: 'break-word' }}>
           <h2 style={{ margin: '0 0 12px', fontSize: 'clamp(1.1rem, 4vw, 1.3rem)' }}>{item.productNm}</h2>
+
+          {images.length > 0 && (
+            <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', marginBottom: '12px', paddingBottom: '4px' }}>
+              {images.map((url, idx) => (
+                <img key={idx} src={url} alt={`${item.productNm} ${idx + 1}`} style={{ width: '120px', height: '120px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
+              ))}
+            </div>
+          )}
 
           <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
             <span style={{ fontSize: '0.8rem', padding: '3px 10px', borderRadius: '12px', background: '#e8f4f8', color: '#54B8DB' }}>{item.category}</span>
@@ -63,7 +74,8 @@ export default function ProductDetail() {
             </p>
           )}
         </div>
-      ))}
+      )
+    })}
     </div>
   )
 }

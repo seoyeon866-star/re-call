@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { searchRecalls, type RecallItem } from '../api/consumerRecall'
+import { searchRecalls, getRecallImages, type RecallItem } from '../api/consumerRecall'
 import { CATEGORIES, buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
 
 const RECALL_SE_OPTIONS = ['리콜', '판매중단', '무상수리', '교환', '환급'] as const
@@ -123,23 +123,36 @@ export default function SearchResult() {
           </div>
 
           <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-            {items.map((item) => (
+            {items.map((item) => {
+              const images = getRecallImages(item)
+              return (
               <li key={item.recallSn} style={{ padding: '14px 0', borderBottom: '1px solid #eee' }}>
-                <Link to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
-                  <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.3, wordBreak: 'break-word' }} dangerouslySetInnerHTML={{ __html: highlight(item.productNm, query) }} />
-                  {item.makr && item.makr !== '-' && <p style={{ margin: '0 0 2px', fontSize: '0.8rem', color: '#888' }}>{item.makr}</p>}
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '6px' }}>
-                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#e8f4f8', color: '#54B8DB' }}>{item.category}</span>
-                    {item.recallSe && <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#fcebea', color: '#e63429' }}>{item.recallSe}</span>}
-                    {item.country && <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#f0f0f0', color: '#666' }}>{item.country}</span>}
-                    {item.riskTags.slice(0, 3).map(tag => (
-                      <span key={tag} style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#fff3e0', color: '#e65100' }}>{tag}</span>
-                    ))}
-                    {item.recallRegDt && <span style={{ fontSize: '0.75rem', color: '#aaa', marginLeft: 'auto' }}>{item.recallRegDt?.slice(0, 10)}</span>}
+                <Link to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
+                  {images.length > 0 && (
+                    <img
+                      src={images[0]}
+                      alt={item.productNm}
+                      style={{ width: 'clamp(64px, 20vw, 88px)', height: 'clamp(64px, 20vw, 88px)', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }}
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
+                    />
+                  )}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.3, wordBreak: 'break-word' }} dangerouslySetInnerHTML={{ __html: highlight(item.productNm, query) }} />
+                    {item.makr && item.makr !== '-' && <p style={{ margin: '0 0 2px', fontSize: '0.8rem', color: '#888' }}>{item.makr}</p>}
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '6px' }}>
+                      <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#e8f4f8', color: '#54B8DB' }}>{item.category}</span>
+                      {item.recallSe && <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#fcebea', color: '#e63429' }}>{item.recallSe}</span>}
+                      {item.country && <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#f0f0f0', color: '#666' }}>{item.country}</span>}
+                      {item.riskTags.slice(0, 3).map(tag => (
+                        <span key={tag} style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#fff3e0', color: '#e65100' }}>{tag}</span>
+                      ))}
+                      {item.recallRegDt && <span style={{ fontSize: '0.75rem', color: '#aaa', marginLeft: 'auto' }}>{item.recallRegDt?.slice(0, 10)}</span>}
+                    </div>
                   </div>
                 </Link>
               </li>
-            ))}
+              )
+            })}
           </ul>
         </>
       )}
