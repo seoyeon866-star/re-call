@@ -50,8 +50,10 @@ export async function searchRecalls(keyword: string): Promise<RecallItem[]> {
   const { data } = await axios.get('/api/recall', {
     params: { keyword },
   })
+  return extractItems(data as Record<string, unknown>)
+}
 
-  const items = extractItems(data as Record<string, unknown>)
-  console.log('[Consumer24] keyword:', keyword, '| items:', items.length)
-  return items
+export async function fetchRecentRecalls(): Promise<RecallItem[]> {
+  const { data } = await axios.get('/api/recent-recalls')
+  return extractItems(data as Record<string, unknown>)
 }

@@ -1,225 +1,79 @@
-import { useEffect, useState, useMemo } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import { searchProducts, type NaverShopItem } from '../api/naverApi';
-import { searchRecalls, type RecallItem } from '../api/consumerRecall';
+import { useEffect, useState, useMemo } from 'react'
+import { useSearchParams, Link } from 'react-router-dom'
+import { searchRecalls, type RecallItem } from '../api/consumerRecall'
+import { CATEGORIES, buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
 
-function normalizeTitle(title: string): string {
-  return title
-    .replace(/<[^>]*>/g, '')
-    .toLowerCase()
-    .replace(/\(.*?\)/g, '')
-    .replace(/bandai|반다이/g, '')
-    .replace(/정품|일본|직구|1개|세트|단품|국내배송|무료배송|로켓배송|빠른배송/g, '')
-    .replace(/[^가-힣a-z0-9]/g, '')
-    .trim()
-}
+const RECALL_SE_OPTIONS = ['리콜', '판매중단', '무상수리', '교환', '환급'] as const
 
-function deduplicateNaverItems(items: NaverShopItem[]): NaverShopItem[] {
-  const uniqueMap = new Map<string, NaverShopItem>()
-  items.forEach((item) => {
-    if (/투어|여행|패키지여행|항공권|호텔|펜션|리조트|해외여행/.test(item.title.replace(/<[^>]*>/g, ''))) {
-      return
-    }
-    if (/be found shop/i.test(item.mallName)) {
-      return
-    }
-    const key = normalizeTitle(item.title)
-    if (!uniqueMap.has(key)) {
-      uniqueMap.set(key, item)
-    }
-  })
-  return [...uniqueMap.values()]
-}
-
-function clean(text: string): string {
-  return text
-    .replace(/<[^>]*>/g, '')
-    .toLowerCase()
-    .replace(/[^a-z0-9가-힣\s]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
-
-function extractKeyword(item: NaverShopItem, fallback: string): string {
-  if (item.brand && item.brand.trim()) {
-    return item.brand.trim()
-  }
-  const title = clean(item.title)
-  const genericWords = new Set(['보조배터리', '충전기', '케이블', '이어폰', '헤드폰', '마우스', '키보드', '파워뱅크', '기내반입', '고속충전', '미니', '휴대용', '대용량', '초고속', 'c타입', '8핀'])
-  const parts = title.split(/\s+/).filter(Boolean)
-  const specific = parts.find(p => p.length >= 2 && !genericWords.has(p))
-  return specific || parts[0] || fallback
-}
-
-function matchesProduct(recall: RecallItem, product: NaverShopItem): boolean {
-  const title = clean(product.title)
-  const brand = clean(product.brand)
-
-  const rName = clean(recall.productNm)
-  const rModel = clean(recall.modlNmInfo)
-  const rMakr = clean(recall.makr)
-
-  const titleWords = new Set(title.split(/\s+/).filter(w => w.length >= 2))
-
-  // Brand check: if product has a brand, recall must reference it as a whole word
-  if (brand && brand.length >= 2) {
-    const recallText = [rName, rModel, rMakr].filter(Boolean).join(' ')
-    const recallWords = recallText.split(/\s+/)
-    if (!recallWords.some(w => w === brand)) return false
-  }
-
-  // Recall name: at least 2 significant words must match in product title
-  if (rName && rName.length >= 3) {
-    const recallWords = rName.split(/\s+/).filter(w => w.length >= 2)
-    const matched = recallWords.filter(w => titleWords.has(w)).length
-    if (matched >= 2) return true
-    if (matched === 1 && recallWords.length === 1 && recallWords[0].length >= 4) {
-      const genericWords = new Set(['보조배터리', '충전기', '케이블', '이어폰', '헤드폰', '마우스', '키보드', '파워뱅크', '완구류', '유아용품'])
-      if (!genericWords.has(recallWords[0])) return true
-    }
-    return false
-  }
-
-  // Model: direct match in title
-  if (rModel && rModel.length >= 4 && title.includes(rModel)) return true
-
-  // Manufacturer: at least 2 words in common
-  if (rMakr && rMakr.length >= 3) {
-    const makrWords = rMakr.split(/\s+/).filter(w => w.length >= 2)
-    const matched = makrWords.filter(w => titleWords.has(w)).length
-    if (matched >= 2) return true
-  }
-
-  return false
-}
-
-function RecallBadge({ count }: { count: number }) {
-  if (count === 0) {
-    return (
-      <span
-        style={{
-          display: 'inline-block',
-          padding: '4px 10px',
-          borderRadius: '12px',
-          fontSize: '0.85rem',
-          fontWeight: 600,
-          background: '#EAF7FC',
-          color: '#54B8DB',
-        }}
-      >
-        리콜 이력 없음
-      </span>
-    );
-  }
-  return (
-    <span
-      style={{
-        display: 'inline-block',
-        padding: '4px 10px',
-        borderRadius: '12px',
-        fontSize: '0.85rem',
-        fontWeight: 600,
-        background: '#FCEBEA',
-        color: '#E63429',
-      }}
-    >
-      리콜 이력 {count}건
-    </span>
-  );
+function highlight(text: string, query: string): string {
+  if (!query) return text
+  const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark style="background:#fff3b0;padding:0 2px">$1</mark>')
 }
 
 export default function SearchResult() {
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get('query') || '';
-  const [naverItems, setNaverItems] = useState<NaverShopItem[]>([]);
-  const [recallMap, setRecallMap] = useState<Map<string, RecallItem[]>>(new Map());
-  const [totalCount, setTotalCount] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [sortBy, setSortBy] = useState<'relevance' | 'latest'>('relevance');
-  const [filterRecallOnly, setFilterRecallOnly] = useState(false);
+  const [searchParams] = useSearchParams()
+  const query = searchParams.get('query') || ''
+
+  const [rawItems, setRawItems] = useState<RecallWithMeta[]>([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const [sortBy, setSortBy] = useState<'relevance' | 'latest'>('relevance')
+  const [filterRecallSe, setFilterRecallSe] = useState('')
+  const [filterCountry, setFilterCountry] = useState('')
+  const [filterCategory, setFilterCategory] = useState('')
+  const [filterRiskTag, setFilterRiskTag] = useState('')
 
   useEffect(() => {
-    if (!query) return;
-    setLoading(true);
-    setError('');
-    setSortBy('relevance');
-    setFilterRecallOnly(false);
+    if (!query) {
+      setRawItems([])
+      return
+    }
+    setLoading(true)
+    setError('')
+    setFilterRecallSe('')
+    setFilterCountry('')
+    setFilterCategory('')
+    setFilterRiskTag('')
 
-    searchProducts(query)
-      .then(async ({ items, total }) => {
-        setNaverItems(items);
-        setTotalCount(total);
-
-        if (items.length === 0) {
-          setLoading(false);
-          return;
-        }
-
-        const results = await Promise.all(
-          items.map(async (product) => {
-            const keyword = extractKeyword(product, query);
-            try {
-              const rawRecalls = await searchRecalls(keyword);
-              const matched = rawRecalls.filter(r => matchesProduct(r, product));
-
-              if (matched.length > 0) {
-                console.log('--- 상품 매칭 ---');
-                console.log('상품명:', product.title.replace(/<[^>]*>/g, ''));
-                matched.forEach(r => {
-                  console.log('매칭된 리콜:', r.productNm, r.modlNmInfo || '', `(${r.recallSe || ''})`);
-                });
-                console.log('최종 카운트:', matched.length);
-              }
-
-              return { productId: product.productId, recalls: matched };
-            } catch {
-              return { productId: product.productId, recalls: [] as RecallItem[] };
-            }
-          })
-        );
-
-        setRecallMap(new Map(results.map(r => [r.productId, r.recalls])));
+    searchRecalls(query)
+      .then((items: RecallItem[]) => {
+        setRawItems(items.map(buildRecallWithMeta))
       })
       .catch((err) => {
-        setError(err.response?.data?.errorMessage || err.message);
+        setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다')
       })
-      .finally(() => setLoading(false));
-  }, [query]);
+      .finally(() => setLoading(false))
+  }, [query])
+
+  const countries = useMemo(() => {
+    const set = new Set(rawItems.map(i => i.country).filter(Boolean))
+    return [...set].sort()
+  }, [rawItems])
+
+  const riskTags = useMemo(() => {
+    const set = new Set(rawItems.flatMap(i => i.riskTags))
+    return [...set].sort()
+  }, [rawItems])
 
   const items = useMemo(() => {
-    const deduped = deduplicateNaverItems(naverItems);
-    let result = deduped.map((item) => {
-      const recalls = recallMap.get(item.productId) || [];
-      const latestRecallDate = recalls.reduce((latest, r) => {
-        return r.recallRegDt && r.recallRegDt > latest ? r.recallRegDt : latest;
-      }, '');
-      return { item, recalls, recallCount: recalls.length, latestRecallDate };
-    });
+    let result = [...rawItems]
 
-    if (filterRecallOnly) {
-      result = result.filter((r) => r.recallCount > 0);
-    }
+    if (filterRecallSe) result = result.filter(i => i.recallSe === filterRecallSe)
+    if (filterCountry) result = result.filter(i => i.country === filterCountry)
+    if (filterCategory) result = result.filter(i => i.category === filterCategory)
+    if (filterRiskTag) result = result.filter(i => i.riskTags.includes(filterRiskTag))
 
     if (sortBy === 'latest') {
-      result.sort((a, b) => {
-        if (a.recallCount === 0 && b.recallCount === 0) return 0;
-        if (a.recallCount === 0) return 1;
-        if (b.recallCount === 0) return -1;
-        return (b.latestRecallDate || '').localeCompare(a.latestRecallDate || '');
-      });
+      result.sort((a, b) => ((b.recallRegDt || '') > (a.recallRegDt || '') ? 1 : -1))
     }
 
-    return result;
-  }, [naverItems, recallMap, sortBy, filterRecallOnly]);
-
-  const recallCount = useMemo(() => {
-    const deduped = deduplicateNaverItems(naverItems);
-    return deduped.filter((item) => (recallMap.get(item.productId) || []).length > 0).length;
-  }, [naverItems, recallMap]);
+    return result
+  }, [rawItems, sortBy, filterRecallSe, filterCountry, filterCategory, filterRiskTag])
 
   return (
-    <div style={{ maxWidth: '800px', margin: '0 auto', padding: '24px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
+    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '24px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', display: 'inline-block', marginBottom: '16px' }}>
         &larr; Home
       </Link>
@@ -228,109 +82,67 @@ export default function SearchResult() {
       {loading && <p>검색 중...</p>}
       {error && <p style={{ color: 'red' }}>오류: {error}</p>}
 
-      {!loading && !error && items.length === 0 && (
+      {!loading && !error && rawItems.length === 0 && (
         <p>검색 결과가 없습니다.</p>
       )}
 
-      {!loading && !error && items.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '16px', padding: '10px 12px', background: '#f9f9f9', borderRadius: '8px', fontSize: '0.9rem' }}>
-          <span style={{ color: '#666', whiteSpace: 'nowrap' }}>
-            검색 결과 {totalCount.toLocaleString()}개
-            {recallCount > 0 && (
-              <span style={{ color: '#E63429', marginLeft: '6px' }}>
-                · 리콜 상품 {recallCount}개 발견
-              </span>
-            )}
-          </span>
-          <div style={{ flex: 1, minWidth: 0 }} />
-          <select
-            value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'relevance' | 'latest')}
-            style={{
-              padding: '6px 10px',
-              borderRadius: '6px',
-              border: '1px solid #ccc',
-              fontSize: '0.85rem',
-              background: '#fff',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="relevance">관련도순</option>
-            <option value="latest">최신순</option>
-          </select>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-            <input
-              type="checkbox"
-              checked={filterRecallOnly}
-              onChange={(e) => setFilterRecallOnly(e.target.checked)}
-              style={{ cursor: 'pointer' }}
-            />
-            리콜 이력 있는 제품만
-          </label>
-        </div>
-      )}
+      {!loading && rawItems.length > 0 && (
+        <>
+          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '16px', padding: '10px 12px', background: '#f9f9f9', borderRadius: '8px', fontSize: '0.9rem' }}>
+            <span style={{ color: '#666' }}>총 {items.length}건 / {rawItems.length}건</span>
+            <div style={{ flex: 1, minWidth: 0 }} />
 
-      <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-        {items.map(({ item, recalls, recallCount }) => (
-          <li
-            key={item.productId}
-            style={{
-              display: 'flex',
-              gap: '12px',
-              padding: '14px 0',
-              borderBottom: '1px solid #eee',
-              alignItems: 'flex-start',
-            }}
-          >
-            <Link
-              to={`/product/${item.productId}`}
-              state={{
-                kind: 'product' as const,
-                item,
-                recalls,
-                recallCount,
-              }}
-              style={{ display: 'flex', gap: '12px', textDecoration: 'none', color: 'inherit', flex: 1, alignItems: 'flex-start', minWidth: 0 }}
-            >
-              <img
-                src={item.image}
-                alt={item.title}
-                style={{
-                  width: 'clamp(72px, 25vw, 100px)',
-                  height: 'clamp(72px, 25vw, 100px)',
-                  objectFit: 'cover',
-                  borderRadius: '8px',
-                  flexShrink: 0,
-                }}
-              />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                {item.brand && (
-                  <p style={{ margin: '0 0 2px', fontSize: '0.8rem', color: '#888' }}>
-                    {item.brand}
-                  </p>
-                )}
-                <h3
-                  style={{
-                    margin: 0,
-                    fontSize: '0.95rem',
-                    lineHeight: 1.3,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    wordBreak: 'break-word',
-                  }}
-                  dangerouslySetInnerHTML={{ __html: item.title }}
-                />
-                <div style={{ marginTop: '8px' }}>
-                  <RecallBadge count={recallCount} />
-                </div>
-              </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+            <select value={sortBy} onChange={e => setSortBy(e.target.value as 'relevance' | 'latest')} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
+              <option value="relevance">관련도순</option>
+              <option value="latest">최신순</option>
+            </select>
+
+            <select value={filterRecallSe} onChange={e => setFilterRecallSe(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
+              <option value="">리콜 유형 (전체)</option>
+              {RECALL_SE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
+            </select>
+
+            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
+              <option value="">카테고리 (전체)</option>
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
+
+            {countries.length > 0 && (
+              <select value={filterCountry} onChange={e => setFilterCountry(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
+                <option value="">국가 (전체)</option>
+                {countries.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            )}
+
+            {riskTags.length > 0 && (
+              <select value={filterRiskTag} onChange={e => setFilterRiskTag(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
+                <option value="">위험 태그 (전체)</option>
+                {riskTags.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+            )}
+          </div>
+
+          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            {items.map((item) => (
+              <li key={item.recallSn} style={{ padding: '14px 0', borderBottom: '1px solid #eee' }}>
+                <Link to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', display: 'block' }}>
+                  <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.3, wordBreak: 'break-word' }} dangerouslySetInnerHTML={{ __html: highlight(item.productNm, query) }} />
+                  {item.makr && item.makr !== '-' && <p style={{ margin: '0 0 2px', fontSize: '0.8rem', color: '#888' }}>{item.makr}</p>}
+                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '6px' }}>
+                    <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#e8f4f8', color: '#54B8DB' }}>{item.category}</span>
+                    {item.recallSe && <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#fcebea', color: '#e63429' }}>{item.recallSe}</span>}
+                    {item.country && <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#f0f0f0', color: '#666' }}>{item.country}</span>}
+                    {item.riskTags.slice(0, 3).map(tag => (
+                      <span key={tag} style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#fff3e0', color: '#e65100' }}>{tag}</span>
+                    ))}
+                    {item.recallRegDt && <span style={{ fontSize: '0.75rem', color: '#aaa', marginLeft: 'auto' }}>{item.recallRegDt?.slice(0, 10)}</span>}
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
     </div>
-  );
+  )
 }

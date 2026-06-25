@@ -9,6 +9,7 @@ export default function App() {
       <Route path="/" element={<Home />} />
       <Route path="/search" element={<SearchResult />} />
       <Route path="/product/:id" element={<ProductDetail />} />
+      <Route path="/recall/:id" element={<ProductDetail />} />
     </Routes>
   );
 }
