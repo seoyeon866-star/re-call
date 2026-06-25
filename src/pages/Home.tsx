@@ -9,15 +9,15 @@ const MAX_RECENT = 8
 
 const CATEGORY_ICONS: Record<string, string> = {
   '유아동': '/assets/category/유아동.png',
-  '완구류': '/assets/category/완구류.png',
-  '식품류': '/assets/category/식품류.png',
-  '전자제품': '/assets/category/전자제품.png',
   '화장품': '/assets/category/화장품.png',
-  '의류': '/assets/category/의류.png',
   '생활용품': '/assets/category/생활용품.png',
+  '완구류': '/assets/category/완구류.png',
+  '의류': '/assets/category/의류.png',
   '욕실용품': '/assets/category/욕실용품.png',
+  '식품류': '/assets/category/식품류.png',
   '주방용품': '/assets/category/주방용품.png',
   '반려동물': '/assets/category/반려동물.png',
+  '전자제품': '/assets/category/전자제품.png',
 }
 
 function getRecentSearches(): string[] {
