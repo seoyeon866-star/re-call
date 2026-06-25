@@ -16,6 +16,7 @@ export interface RecallItem {
   cnsmrGhvrTips: string
   aditfield13: string
   recallRegDt?: string
+  category?: string
 }
 
 export function getRecallImages(item: RecallItem): string[] {
@@ -23,42 +24,23 @@ export function getRecallImages(item: RecallItem): string[] {
   return item.recallImgUrls.split(',').map(s => s.trim()).filter(Boolean)
 }
 
-function extractItems(raw: Record<string, unknown>): RecallItem[] {
-  if (!raw) return []
-
-  const dig = (obj: Record<string, unknown>, ...keys: string[]): unknown => {
-    let cur: unknown = obj
-    for (const k of keys) {
-      if (!cur || typeof cur !== 'object') return undefined
-      cur = (cur as Record<string, unknown>)[k]
-    }
-    return cur
-  }
-
-  const tryGet = (...path: string[]): RecallItem[] | undefined => {
-    const val = dig(raw, ...path)
-    if (!val) return undefined
-    return Array.isArray(val) ? (val as RecallItem[]) : [val as RecallItem]
-  }
-
-  return (
-    tryGet('selectCntntsForOpenAPIResponse', 'channel', 'return', 'content') ??
-    tryGet('selectCntntsForOpenAPIResponse', 'return', 'content') ??
-    tryGet('channel', 'return', 'content') ??
-    tryGet('return', 'content') ??
-    tryGet('content') ??
-    []
-  )
+export async function searchRecalls(keyword: string): Promise<RecallItem[]> {
+  const { data } = await axios.get('/api/recalls', {
+    params: { q: keyword },
+  })
+  return (data as any).items || []
 }
 
-export async function searchRecalls(keyword: string): Promise<RecallItem[]> {
-  const { data } = await axios.get('/api/recall', {
-    params: { keyword },
+export async function fetchByCategory(category: string): Promise<RecallItem[]> {
+  const { data } = await axios.get('/api/recalls', {
+    params: { category },
   })
-  return extractItems(data as Record<string, unknown>)
+  return (data as any).items || []
 }
 
 export async function fetchRecentRecalls(): Promise<RecallItem[]> {
-  const { data } = await axios.get('/api/recent-recalls')
-  return extractItems(data as Record<string, unknown>)
+  const { data } = await axios.get('/api/recalls', {
+    params: { recent: 'true' },
+  })
+  return (data as any).items || []
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { searchRecalls, fetchRecentRecalls, getRecallImages, type RecallItem } from '../api/consumerRecall'
+import { searchRecalls, fetchByCategory, getRecallImages } from '../api/consumerRecall'
 import { CATEGORIES } from '../config/categories'
 import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
 
@@ -33,16 +33,13 @@ export default function SearchResult() {
     setFilterRiskTag('')
 
     if (isCategoryMode) {
-      fetchRecentRecalls()
-        .then((items: RecallItem[]) => {
-          const classified = items.map(buildRecallWithMeta)
-          setRawItems(classified.filter(i => i.category === category))
-        })
-        .catch(err => setError(err?.response?.data?.errorMessage || err.message || '카테고리 정보를 불러올 수 없습니다'))
+      fetchByCategory(category)
+        .then(items => setRawItems(items.map(buildRecallWithMeta)))
+        .catch(err => setError(err?.message || '카테고리 정보를 불러올 수 없습니다'))
         .finally(() => setLoading(false))
     } else {
       searchRecalls(query)
-        .then((items: RecallItem[]) => setRawItems(items.map(buildRecallWithMeta)))
+        .then(items => setRawItems(items.map(buildRecallWithMeta)))
         .catch(err => setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다'))
         .finally(() => setLoading(false))
     }

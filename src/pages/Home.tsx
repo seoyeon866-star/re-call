@@ -98,8 +98,8 @@ export default function Home() {
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
               {recentSearches.map(term => (
                 <button key={term} onClick={() => navigate(`/search?query=${encodeURIComponent(term)}`)} style={{
-                  padding: '6px 14px', borderRadius: '20px', border: '1px solid #54B8DB',
-                  background: '#fff', fontSize: '0.8rem', color: '#54B8DB', cursor: 'pointer',
+                  padding: '6px 14px', borderRadius: '20px', border: '1px solid #cbd5e1',
+                  background: '#fff', fontSize: '0.8rem', color: '#94a3b8', cursor: 'pointer',
                 }}>{term}</button>
               ))}
             </div>

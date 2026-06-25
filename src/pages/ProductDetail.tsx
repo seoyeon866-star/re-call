@@ -1,128 +1,169 @@
+import { useEffect, useState } from 'react'
 import { useLocation, Link } from 'react-router-dom'
-import { getRecallImages } from '../api/consumerRecall'
+import { getRecallImages, fetchByCategory, type RecallItem } from '../api/consumerRecall'
 import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
 
-interface RecallDetailData {
-  items: RecallItem[]
-  fromQuery?: string
-}
-
-interface RecallItem {
-  recallSn: string
-  cntntsId: string
-  productNm: string
-  makr: string
-  bsnmNm: string
-  modlNmInfo: string
-  shrtcomCn: string
-  recallSe: string
-  hrmflGrad: string
-  mainSleoffic: string
-  recallImgUrls: string
-  injryCauseResult: string
-  cnsmrGhvrTips: string
-  aditfield13: string
-  recallRegDt?: string
-}
-
-function DetailRow({ label, value, color }: { label: string; value: string; color?: string }) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   if (!value || value === '-') return null
   return (
     <div style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
-      <span style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '2px' }}>{label}</span>
-      <span style={{ fontSize: '0.9rem', color: color || '#1e293b', lineHeight: 1.4, wordBreak: 'break-word' }}>{value}</span>
+      <p style={{ margin: '0 0 2px', fontSize: '0.78rem', color: '#94a3b8' }}>{label}</p>
+      <p style={{ margin: 0, fontSize: '0.9rem', color: '#1e293b' }}>{value}</p>
     </div>
   )
 }
 
 export default function ProductDetail() {
   const location = useLocation()
-  const data = location.state as RecallDetailData | null
+  const data = location.state as { items: RecallItem[]; fromQuery?: string } | null
 
-  if (!data || !data.items || data.items.length === 0) {
+  const [altItems, setAltItems] = useState<RecallWithMeta[]>([])
+
+  const item: RecallWithMeta | null = data?.items?.[0]
+    ? buildRecallWithMeta(data.items[0])
+    : null
+
+  useEffect(() => {
+    if (!item || !item.category || item.category === '기타') return
+    fetchByCategory(item.category)
+      .then(items => {
+        const filtered = items
+          .filter(i => i.recallSn !== item.recallSn)
+          .slice(0, 10)
+          .map(buildRecallWithMeta)
+        setAltItems(filtered)
+      })
+      .catch(() => {})
+  }, [item?.recallSn])
+
+  if (!item) {
     return (
-      <div style={{ padding: '64px 16px', textAlign: 'center' }}>
-        <p style={{ color: '#94a3b8', marginBottom: '16px' }}>리콜 정보를 불러올 수 없습니다.</p>
-        <Link to={data?.fromQuery ? `/search?query=${encodeURIComponent(data.fromQuery)}` : '/search'} style={{ color: '#3b82f6', fontSize: '0.9rem' }}>검색 결과로 돌아가기</Link>
+      <div style={{ minHeight: '100vh', background: '#F4FBFD', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '40px' }}>
+        <p style={{ color: '#94a3b8' }}>리콜 정보를 불러올 수 없습니다.</p>
+        <Link to="/search" style={{ color: '#54B8DB', fontSize: '0.9rem' }}>검색 결과로 돌아가기</Link>
       </div>
     )
   }
 
-  const item: RecallWithMeta = buildRecallWithMeta(data.items[0])
   const images = getRecallImages(item)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F4FBFD', maxWidth: '480px', margin: '0 auto', boxSizing: 'border-box', overflowX: 'hidden' }}>
-      <div style={{ padding: '16px', position: 'sticky', top: 0, background: '#fff', zIndex: 10, borderBottom: '1px solid #e2e8f0' }}>
-        <Link to={data.fromQuery ? `/search?query=${encodeURIComponent(data.fromQuery)}` : '/search'} style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
-          <span>&larr;</span>
-          <span style={{ fontSize: '0.85rem', color: '#54B8DB' }}>뒤로</span>
+    <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box' }}>
+      {/* ── Header ── */}
+      <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #e2e8f0' }}>
+        <Link to={data?.fromQuery ? `/search?query=${encodeURIComponent(data.fromQuery)}` : '/search'} style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <span style={{ fontSize: '1.1rem' }}>&larr;</span> 뒤로
+        </Link>
+        <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500 }}>
+          검색
         </Link>
       </div>
 
-      {images.length > 0 && (
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', padding: '16px', background: '#f8fafc', WebkitOverflowScrolling: 'touch' }}>
-          {images.map((url, idx) => (
-            <img key={idx} src={url} alt={`${item.productNm} ${idx + 1}`} style={{ width: 'clamp(120px, 40vw, 180px)', height: 'clamp(120px, 40vw, 180px)', objectFit: 'cover', borderRadius: '12px', flexShrink: 0 }} />
-          ))}
+      {/* ── Image ── */}
+      <div style={{ background: '#f8fafc', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'clamp(200px, 50vw, 320px)' }}>
+        {images.length > 0 ? (
+          <img src={images[0]} alt={item.productNm} style={{ width: '100%', maxHeight: 'clamp(200px, 50vw, 320px)', objectFit: 'cover' }} />
+        ) : (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: '#cbd5e1', width: '100%', height: 'clamp(200px, 50vw, 320px)' }}>
+            ?
+          </div>
+        )}
+      </div>
+
+      {/* ── Product info card ── */}
+      <div style={{ margin: '-20px 16px 0', background: '#fff', borderRadius: '20px', padding: '24px', position: 'relative', zIndex: 1, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+        {item.makr && item.makr !== '-' && (
+          <p style={{ margin: '0 0 4px', fontSize: '0.8rem', color: '#94a3b8' }}>{item.makr}</p>
+        )}
+        <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.2rem, 5vw, 1.4rem)', fontWeight: 700, color: '#1e293b', lineHeight: 1.3, wordBreak: 'break-word' }}>
+          {item.productNm}
+        </h1>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <span style={{ display: 'inline-block', padding: '6px 14px', borderRadius: '20px', fontSize: '0.85rem', fontWeight: 600, background: '#FEF2F2', color: '#ef4444' }}>
+            리콜 이력 1건
+          </span>
+          <span style={{ fontSize: '0.82rem', color: '#94a3b8' }}>
+            {item.recallRegDt?.slice(0, 7).replace('-', '.')} · {item.recallSe || '리콜'}
+          </span>
+        </div>
+
+        {/* ── Defect section ── */}
+        <div style={{ marginTop: '24px' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 10px' }}>결함 내용</h2>
+          <div style={{ background: '#FEF2F2', borderRadius: '12px', padding: '16px' }}>
+            {item.riskTags.length > 0 && (
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: '#ef4444', color: '#fff', fontWeight: 600 }}>위험 태그</span>
+                {item.riskTags.map(tag => (
+                  <span key={tag} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: '#fff', color: '#ef4444', fontWeight: 600, border: '1px solid #fecaca' }}>{tag}</span>
+                ))}
+              </div>
+            )}
+            <p style={{ margin: 0, fontSize: '0.9rem', color: '#1e293b', lineHeight: 1.6, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>{item.shrtcomCn || '정보 없음'}</p>
+          </div>
+        </div>
+
+        {/* ── Product info ── */}
+        <div style={{ marginTop: '24px' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 10px' }}>제품 정보</h2>
+          <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '0 14px' }}>
+            {item.modlNmInfo && <InfoRow label="모델명" value={item.modlNmInfo} />}
+            {item.makr && item.makr !== '-' && <InfoRow label="제조사" value={item.makr} />}
+            {item.bsnmNm && item.bsnmNm !== '-' && <InfoRow label="사업자명" value={item.bsnmNm} />}
+            {item.recallRegDt && <InfoRow label="공표일" value={item.recallRegDt?.slice(0, 10)} />}
+            {item.country && <InfoRow label="제조국가" value={item.country} />}
+            {item.mainSleoffic && <InfoRow label="주관기관" value={item.mainSleoffic} />}
+            <div style={{ padding: '10px 0' }}>
+              <p style={{ margin: '0 0 2px', fontSize: '0.78rem', color: '#94a3b8' }}>공표문</p>
+              {item.cntntsId ? (
+                <a href={`https://www.consumer24.go.kr/portal/issue/issueDetail.ibo?cntntsId=${item.cntntsId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9rem', color: '#54B8DB', textDecoration: 'none', fontWeight: 500 }}>
+                  소비자24 원문 바로가기 →
+                </a>
+              ) : (
+                <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8' }}>정보 없음</p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Alternative products ── */}
+      {altItems.length > 0 && (
+        <div style={{ padding: '24px 16px 32px' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 4px' }}>대체상품 추천</h2>
+          <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 16px' }}>같은 카테고리의 다른 리콜 상품을 확인해보세요.</p>
+          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
+            {altItems.slice(0, 6).map(alt => {
+              const altImages = getRecallImages(alt)
+              return (
+                <Link key={alt.recallSn} to={`/recall/${alt.recallSn}`} state={{ items: [alt] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(120px, 35vw, 160px)' }}>
+                  <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>
+                    <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>
+                      {altImages.length > 0 ? (
+                        <img src={altImages[0]} alt={alt.productNm} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : '?'}
+                    </div>
+                    <div style={{ padding: '10px' }}>
+                      <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{alt.productNm}</p>
+                      <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: '8px', fontSize: '0.68rem', fontWeight: 600, background: '#FEF2F2', color: '#ef4444' }}>리콜 있음</span>
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
         </div>
       )}
 
-      <div style={{ padding: '16px' }}>
-        <h1 style={{ margin: '0 0 8px', fontSize: 'clamp(1.15rem, 4.5vw, 1.35rem)', fontWeight: 700, color: '#1e293b', lineHeight: 1.3, wordBreak: 'break-word' }}>{item.productNm}</h1>
-
-        <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '16px' }}>
-          {item.category && <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', background: '#dbeafe', color: '#3b82f6', fontWeight: 600 }}>{item.category}</span>}
-          {item.recallSe && <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', background: '#fee2e2', color: '#ef4444', fontWeight: 600 }}>{item.recallSe}</span>}
-          {item.country && <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', background: '#f1f5f9', color: '#64748b' }}>{item.country}</span>}
-          {item.riskTags.map(tag => (
-            <span key={tag} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '8px', background: '#fef3c7', color: '#d97706', fontWeight: 600 }}>{tag}</span>
-          ))}
+      {/* ── More button ── */}
+      {item.category && item.category !== '기타' && (
+        <div style={{ padding: '0 16px 32px', textAlign: 'center' }}>
+          <Link to={`/search?category=${encodeURIComponent(item.category)}`} style={{ display: 'inline-block', padding: '12px 32px', borderRadius: '12px', background: '#54B8DB', color: '#fff', fontSize: '0.9rem', fontWeight: 600, textDecoration: 'none' }}>
+            {item.category} 전체보기
+          </Link>
         </div>
-
-        <div style={{ background: '#f8fafc', borderRadius: '12px', padding: '0 12px', marginBottom: '16px' }}>
-          <DetailRow label="제품명" value={item.productNm} />
-          {item.recallSe && <DetailRow label="리콜 유형" value={item.recallSe} color="#ef4444" />}
-          {item.recallRegDt && <DetailRow label="공표일" value={item.recallRegDt?.slice(0, 10)} />}
-          {item.makr && item.makr !== '-' && <DetailRow label="제조사" value={item.makr} />}
-          {item.modlNmInfo && <DetailRow label="모델명" value={item.modlNmInfo} />}
-          {item.bsnmNm && item.bsnmNm !== '-' && <DetailRow label="사업자명" value={item.bsnmNm} />}
-          {item.country && <DetailRow label="제조국가" value={item.country} />}
-          {item.mainSleoffic && <DetailRow label="주관기관" value={item.mainSleoffic} />}
-          {item.hrmflGrad && <DetailRow label="위해성 등급" value={item.hrmflGrad} />}
-        </div>
-
-        {item.shrtcomCn && (
-          <div style={{ marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 8px' }}>결함 내용</h3>
-            <p style={{ fontSize: '0.9rem', color: '#475569', lineHeight: 1.6, margin: 0, wordBreak: 'break-word' }}>{item.shrtcomCn}</p>
-          </div>
-        )}
-
-        {item.injryCauseResult && (
-          <div style={{ marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 8px' }}>위해 원인</h3>
-            <p style={{ fontSize: '0.9rem', color: '#475569', lineHeight: 1.6, margin: 0, wordBreak: 'break-word' }}>{item.injryCauseResult}</p>
-          </div>
-        )}
-
-        {item.cnsmrGhvrTips && (
-          <div style={{ marginBottom: '16px' }}>
-            <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 8px' }}>소비자 유의사항</h3>
-            <p style={{ fontSize: '0.9rem', color: '#475569', lineHeight: 1.6, margin: 0, wordBreak: 'break-word' }}>{item.cnsmrGhvrTips}</p>
-          </div>
-        )}
-
-        {item.cntntsId && (
-          <a
-            href={`https://www.consumer24.go.kr/portal/issue/issueDetail.ibo?cntntsId=${item.cntntsId}`}
-            target="_blank" rel="noopener noreferrer"
-            style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: '12px', background: '#54B8DB', color: '#fff', fontSize: '0.9rem', fontWeight: 600, textDecoration: 'none', marginTop: '8px' }}
-          >
-            소비자24 원문 보기
-          </a>
-        )}
-      </div>
+      )}
     </div>
   )
 }

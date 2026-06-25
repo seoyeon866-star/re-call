@@ -46,7 +46,7 @@ export function extractCountry(item: RecallItem): string {
 export function buildRecallWithMeta(item: RecallItem) {
   return {
     ...item,
-    category: classifyCategory(item),
+    category: (item as any).category || classifyCategory(item),
     riskTags: extractRiskTags(item),
     country: extractCountry(item),
   }
