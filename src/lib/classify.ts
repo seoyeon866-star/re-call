@@ -21,7 +21,10 @@ const COUNTRY_KEYWORDS: { country: string; keywords: string[] }[] = [
 ]
 
 export function classifyCategory(item: RecallItem): string {
-  const text = `${item.productNm} ${item.shrtcomCn} ${item.modlNmInfo}`.toLowerCase()
+  const productNm = item.productNm || ''
+  const shrtcomCn = item.shrtcomCn || ''
+  const modlNmInfo = item.modlNmInfo || ''
+  const text = `${productNm} ${shrtcomCn} ${modlNmInfo}`.toLowerCase()
   let best: { category: string; score: number } = { category: '기타', score: 0 }
   for (const rule of CATEGORY_RULES) {
     const score = rule.keywords.filter(kw => text.includes(kw.toLowerCase())).length
@@ -31,12 +34,18 @@ export function classifyCategory(item: RecallItem): string {
 }
 
 export function extractRiskTags(item: RecallItem): string[] {
-  const text = `${item.shrtcomCn} ${item.injryCauseResult} ${item.productNm}`.toLowerCase()
+  const shrtcomCn = item.shrtcomCn || ''
+  const injryCauseResult = item.injryCauseResult || ''
+  const productNm = item.productNm || ''
+  const text = `${shrtcomCn} ${injryCauseResult} ${productNm}`.toLowerCase()
   return RISK_KEYWORDS.filter(r => r.keywords.some(kw => text.includes(kw.toLowerCase()))).map(r => r.tag)
 }
 
 export function extractCountry(item: RecallItem): string {
-  const text = `${item.aditfield13} ${item.makr} ${item.mainSleoffic}`.toLowerCase()
+  const aditfield13 = item.aditfield13 || ''
+  const makr = item.makr || ''
+  const mainSleoffic = item.mainSleoffic || ''
+  const text = `${aditfield13} ${makr} ${mainSleoffic}`.toLowerCase()
   for (const c of COUNTRY_KEYWORDS) {
     if (c.keywords.some(kw => text.includes(kw.toLowerCase()))) return c.country
   }
