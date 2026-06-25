@@ -20,3 +20,8 @@ CREATE TABLE IF NOT EXISTS recalls (
 
 CREATE INDEX IF NOT EXISTS idx_recalls_category ON recalls(category);
 CREATE INDEX IF NOT EXISTS idx_recalls_reg_dt ON recalls(recall_reg_dt DESC NULLS LAST);
+
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+CREATE INDEX IF NOT EXISTS idx_recalls_product_nm_trgm ON recalls USING gin (product_nm gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_recalls_makr_trgm ON recalls USING gin (makr gin_trgm_ops);
+CREATE INDEX IF NOT EXISTS idx_recalls_bsnm_nm_trgm ON recalls USING gin (bsnm_nm gin_trgm_ops);
