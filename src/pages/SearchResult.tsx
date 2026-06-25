@@ -34,13 +34,29 @@ export default function SearchResult() {
 
     if (isCategoryMode) {
       fetchByCategory(category)
-        .then(items => setRawItems(items.map(buildRecallWithMeta)))
-        .catch(err => setError(err?.message || '카테고리 정보를 불러올 수 없습니다'))
+        .then(items => {
+          if (!items || items.length === 0) {
+            setError('카테고리 결과가 없습니다 (items empty)');
+          }
+          setRawItems(items.map(buildRecallWithMeta))
+        })
+        .catch(err => {
+          setError(err?.message || '카테고리 정보를 불러올 수 없습니다')
+          setRawItems([])
+        })
         .finally(() => setLoading(false))
     } else {
       searchRecalls(query)
-        .then(items => setRawItems(items.map(buildRecallWithMeta)))
-        .catch(err => setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다'))
+        .then(items => {
+          if (!items || items.length === 0) {
+            setError('검색 결과가 없습니다 (items empty)');
+          }
+          setRawItems(items.map(buildRecallWithMeta))
+        })
+        .catch(err => {
+          setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다')
+          setRawItems([])
+        })
         .finally(() => setLoading(false))
     }
   }, [query, category])
