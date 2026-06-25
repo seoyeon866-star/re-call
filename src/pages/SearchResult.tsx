@@ -34,29 +34,13 @@ export default function SearchResult() {
 
     if (isCategoryMode) {
       fetchByCategory(category)
-        .then(items => {
-          if (!items || items.length === 0) {
-            setError('카테고리 결과가 없습니다 (items empty)');
-          }
-          setRawItems(items.map(buildRecallWithMeta))
-        })
-        .catch(err => {
-          setError(err?.message || '카테고리 정보를 불러올 수 없습니다')
-          setRawItems([])
-        })
+        .then(items => setRawItems(items.map(buildRecallWithMeta)))
+        .catch(err => setError(err?.message || '카테고리 정보를 불러올 수 없습니다'))
         .finally(() => setLoading(false))
     } else {
       searchRecalls(query)
-        .then(items => {
-          if (!items || items.length === 0) {
-            setError('검색 결과가 없습니다 (items empty)');
-          }
-          setRawItems(items.map(buildRecallWithMeta))
-        })
-        .catch(err => {
-          setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다')
-          setRawItems([])
-        })
+        .then(items => setRawItems(items.map(buildRecallWithMeta)))
+        .catch(err => setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다'))
         .finally(() => setLoading(false))
     }
   }, [query, category])
@@ -152,11 +136,8 @@ export default function SearchResult() {
                 )}
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.3, color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.productNm}</h3>
-                  {item.makr && item.makr !== '-' && <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8' }}>제조사: {item.makr}</p>}
-                  {item.modlNmInfo && item.modlNmInfo !== '-' && <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8' }}>모델명: {item.modlNmInfo}</p>}
-                  {item.shrtcomCn && <p style={{ margin: 0, fontSize: '0.78rem', color: '#64748b', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.shrtcomCn}</p>}
+                  {item.makr && item.makr !== '-' && <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8' }}>{item.makr}</p>}
                   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center', marginTop: '2px' }}>
-                    {item.recallRegDt && <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#f1f5f9', color: '#64748b' }}>{item.recallRegDt.slice(0, 10)}</span>}
                     <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#dbeafe', color: '#3b82f6' }}>{item.category}</span>
                     {item.recallSe && <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#fee2e2', color: '#ef4444' }}>{item.recallSe}</span>}
                     {item.riskTags.slice(0, 2).map(tag => (
