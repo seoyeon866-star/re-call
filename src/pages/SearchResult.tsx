@@ -8,7 +8,7 @@ const RECALL_SE_OPTIONS = ['리콜', '판매중단', '무상수리', '교환', '
 function highlight(text: string, query: string): string {
   if (!query) return text
   const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark style="background:#fff3b0;padding:0 2px">$1</mark>')
+  return text.replace(new RegExp(`(${escaped})`, 'gi'), '<mark style="background:#fef08a;padding:0 2px;border-radius:2px">$1</mark>')
 }
 
 export default function SearchResult() {
@@ -26,10 +26,7 @@ export default function SearchResult() {
   const [filterRiskTag, setFilterRiskTag] = useState('')
 
   useEffect(() => {
-    if (!query) {
-      setRawItems([])
-      return
-    }
+    if (!query) { setRawItems([]); return }
     setLoading(true)
     setError('')
     setFilterRecallSe('')
@@ -38,122 +35,111 @@ export default function SearchResult() {
     setFilterRiskTag('')
 
     searchRecalls(query)
-      .then((items: RecallItem[]) => {
-        setRawItems(items.map(buildRecallWithMeta))
-      })
-      .catch((err) => {
-        setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다')
-      })
+      .then((items: RecallItem[]) => setRawItems(items.map(buildRecallWithMeta)))
+      .catch(err => setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다'))
       .finally(() => setLoading(false))
   }, [query])
 
-  const countries = useMemo(() => {
-    const set = new Set(rawItems.map(i => i.country).filter(Boolean))
-    return [...set].sort()
-  }, [rawItems])
-
-  const riskTags = useMemo(() => {
-    const set = new Set(rawItems.flatMap(i => i.riskTags))
-    return [...set].sort()
+  const filters = useMemo(() => {
+    const countries = [...new Set(rawItems.map(i => i.country).filter(Boolean))].sort()
+    const riskTags = [...new Set(rawItems.flatMap(i => i.riskTags))].sort()
+    return { countries, riskTags }
   }, [rawItems])
 
   const items = useMemo(() => {
     let result = [...rawItems]
-
     if (filterRecallSe) result = result.filter(i => i.recallSe === filterRecallSe)
     if (filterCountry) result = result.filter(i => i.country === filterCountry)
     if (filterCategory) result = result.filter(i => i.category === filterCategory)
     if (filterRiskTag) result = result.filter(i => i.riskTags.includes(filterRiskTag))
-
-    if (sortBy === 'latest') {
-      result.sort((a, b) => ((b.recallRegDt || '') > (a.recallRegDt || '') ? 1 : -1))
-    }
-
+    if (sortBy === 'latest') result.sort((a, b) => ((b.recallRegDt || '') > (a.recallRegDt || '') ? 1 : -1))
     return result
   }, [rawItems, sortBy, filterRecallSe, filterCountry, filterCategory, filterRiskTag])
 
   return (
-    <div style={{ maxWidth: '720px', margin: '0 auto', padding: '24px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
-      <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', display: 'inline-block', marginBottom: '16px' }}>
-        &larr; Home
-      </Link>
-      <h2 style={{ fontSize: 'clamp(1.1rem, 4vw, 1.5rem)', wordBreak: 'break-word' }}>&ldquo;{query}&rdquo; 검색 결과</h2>
+    <div style={{ maxWidth: '480px', margin: '0 auto', padding: '24px 16px 40px', boxSizing: 'border-box', overflowX: 'hidden' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
+        <Link to="/" style={{ textDecoration: 'none', color: '#64748b', fontSize: '1.2rem' }}>&larr;</Link>
+        <h2 style={{ margin: 0, fontSize: 'clamp(1rem, 4vw, 1.2rem)', fontWeight: 600, color: '#1e293b', wordBreak: 'break-word' }}>&ldquo;{query}&rdquo; 검색 결과</h2>
+      </div>
 
-      {loading && <p>검색 중...</p>}
-      {error && <p style={{ color: 'red' }}>오류: {error}</p>}
+      {loading && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '8px 0' }}>
+          {[1,2,3,4].map(i => (
+            <div key={i} style={{ display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#f8fafc' }}>
+              <div style={{ width: '72px', height: '72px', borderRadius: '8px', background: '#f1f5f9', flexShrink: 0 }} />
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ height: '14px', width: '70%', borderRadius: '4px', background: '#f1f5f9' }} />
+                <div style={{ height: '10px', width: '40%', borderRadius: '4px', background: '#f1f5f9' }} />
+                <div style={{ height: '10px', width: '50%', borderRadius: '4px', background: '#f1f5f9' }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      {error && <p style={{ color: '#ef4444', fontSize: '0.9rem', padding: '12px', background: '#fef2f2', borderRadius: '8px' }}>{error}</p>}
 
-      {!loading && !error && rawItems.length === 0 && (
-        <p>검색 결과가 없습니다.</p>
+      {!loading && rawItems.length === 0 && (
+        <p style={{ color: '#94a3b8', textAlign: 'center', padding: '48px 0', fontSize: '0.9rem' }}>검색 결과가 없습니다.</p>
       )}
 
       {!loading && rawItems.length > 0 && (
         <>
-          <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', marginBottom: '16px', padding: '10px 12px', background: '#f9f9f9', borderRadius: '8px', fontSize: '0.9rem' }}>
-            <span style={{ color: '#666' }}>총 {items.length}건 / {rawItems.length}건</span>
-            <div style={{ flex: 1, minWidth: 0 }} />
-
-            <select value={sortBy} onChange={e => setSortBy(e.target.value as 'relevance' | 'latest')} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
+            <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center', background: '#f8fafc', borderRadius: '10px', padding: '4px 8px' }}>
+              <span style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap' }}>총 {items.length}건</span>
+            </div>
+            <select value={sortBy} onChange={e => setSortBy(e.target.value as 'relevance' | 'latest')} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
               <option value="relevance">관련도순</option>
               <option value="latest">최신순</option>
             </select>
-
-            <select value={filterRecallSe} onChange={e => setFilterRecallSe(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
-              <option value="">리콜 유형 (전체)</option>
+            <select value={filterRecallSe} onChange={e => setFilterRecallSe(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+              <option value="">유형</option>
               {RECALL_SE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
-
-            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
-              <option value="">카테고리 (전체)</option>
+            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+              <option value="">카테고리</option>
               {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
             </select>
-
-            {countries.length > 0 && (
-              <select value={filterCountry} onChange={e => setFilterCountry(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
-                <option value="">국가 (전체)</option>
-                {countries.map(c => <option key={c} value={c}>{c}</option>)}
+            {filters.countries.length > 0 && (
+              <select value={filterCountry} onChange={e => setFilterCountry(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+                <option value="">국가</option>
+                {filters.countries.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             )}
-
-            {riskTags.length > 0 && (
-              <select value={filterRiskTag} onChange={e => setFilterRiskTag(e.target.value)} style={{ padding: '6px 10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '0.85rem', background: '#fff', cursor: 'pointer' }}>
-                <option value="">위험 태그 (전체)</option>
-                {riskTags.map(t => <option key={t} value={t}>{t}</option>)}
+            {filters.riskTags.length > 0 && (
+              <select value={filterRiskTag} onChange={e => setFilterRiskTag(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+                <option value="">위험</option>
+                {filters.riskTags.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             )}
           </div>
 
-          <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
             {items.map((item) => {
               const images = getRecallImages(item)
               return (
-              <li key={item.recallSn} style={{ padding: '14px 0', borderBottom: '1px solid #eee' }}>
-                <Link to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                  {images.length > 0 && (
-                    <img
-                      src={images[0]}
-                      alt={item.productNm}
-                      style={{ width: 'clamp(64px, 20vw, 88px)', height: 'clamp(64px, 20vw, 88px)', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }}
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }}
-                    />
-                  )}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', fontWeight: 600, lineHeight: 1.3, wordBreak: 'break-word' }} dangerouslySetInnerHTML={{ __html: highlight(item.productNm, query) }} />
-                    {item.makr && item.makr !== '-' && <p style={{ margin: '0 0 2px', fontSize: '0.8rem', color: '#888' }}>{item.makr}</p>}
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center', marginTop: '6px' }}>
-                      <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#e8f4f8', color: '#54B8DB' }}>{item.category}</span>
-                      {item.recallSe && <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#fcebea', color: '#e63429' }}>{item.recallSe}</span>}
-                      {item.country && <span style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#f0f0f0', color: '#666' }}>{item.country}</span>}
-                      {item.riskTags.slice(0, 3).map(tag => (
-                        <span key={tag} style={{ fontSize: '0.75rem', padding: '2px 8px', borderRadius: '10px', background: '#fff3e0', color: '#e65100' }}>{tag}</span>
-                      ))}
-                      {item.recallRegDt && <span style={{ fontSize: '0.75rem', color: '#aaa', marginLeft: 'auto' }}>{item.recallRegDt?.slice(0, 10)}</span>}
-                    </div>
+              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+                {images.length > 0 ? (
+                  <img src={images[0]} alt={item.productNm} style={{ width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
+                ) : (
+                  <div style={{ width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', borderRadius: '8px', background: '#e2e8f0', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>?</div>
+                )}
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.3, color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }} dangerouslySetInnerHTML={{ __html: highlight(item.productNm, query) }} />
+                  {item.makr && item.makr !== '-' && <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8' }}>{item.makr}</p>}
+                  <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center', marginTop: '2px' }}>
+                    <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#dbeafe', color: '#3b82f6' }}>{item.category}</span>
+                    {item.recallSe && <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#fee2e2', color: '#ef4444' }}>{item.recallSe}</span>}
+                    {item.riskTags.slice(0, 2).map(tag => (
+                      <span key={tag} style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#fef3c7', color: '#d97706' }}>{tag}</span>
+                    ))}
                   </div>
-                </Link>
-              </li>
+                </div>
+              </Link>
               )
             })}
-          </ul>
+          </div>
         </>
       )}
     </div>
