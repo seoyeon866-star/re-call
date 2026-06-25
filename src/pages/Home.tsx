@@ -124,30 +124,32 @@ export default function Home() {
         <section>
           <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 12px' }}>최근 등록된 리콜</h3>
           {loading && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              {[1,2,3].map(i => (
-                <div key={i} style={{ height: '60px', borderRadius: '10px', background: '#fff' }} />
+            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+              {[1,2,3,4,5].map(i => (
+                <div key={i} style={{ width: 'clamp(130px, 38vw, 170px)', borderRadius: '12px', background: '#fff', flexShrink: 0, aspectRatio: '2/3' }} />
               ))}
             </div>
           )}
           {!loading && recentRecalls.length === 0 && (
             <p style={{ color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', padding: '32px 0' }}>리콜 정보를 불러올 수 없습니다.</p>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {recentRecalls.slice(0, 10).map((item) => {
+          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
+            {recentRecalls.slice(0, 5).map((item) => {
               const images = getRecallImages(item)
               return (
-              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', alignItems: 'center', padding: '8px 0', borderBottom: '1px solid #e2e8f0' }}>
-                {images.length > 0 ? (
-                  <img src={images[0]} alt={item.productNm} style={{ width: '48px', height: '48px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
-                ) : (
-                  <div style={{ width: '48px', height: '48px', borderRadius: '8px', background: '#e2e8f0', flexShrink: 0 }} />
-                )}
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ margin: '0 0 2px', fontWeight: 600, fontSize: '0.9rem', color: '#1e293b', wordBreak: 'break-word' }}>{item.productNm}</p>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.7rem', padding: '1px 8px', borderRadius: '8px', background: '#EBF7FD', color: '#54B8DB' }}>{item.category}</span>
-                    {item.recallRegDt && <span style={{ fontSize: '0.7rem', color: '#94a3b8' }}>{item.recallRegDt?.slice(0, 10)}</span>}
+              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(130px, 38vw, 170px)' }}>
+                <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>
+                  <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>
+                    {images.length > 0 ? (
+                      <img src={images[0]} alt={item.productNm} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : '?'}
+                  </div>
+                  <div style={{ padding: '10px' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: '#1e293b', fontWeight: 600, wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{item.productNm}</p>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '6px', background: '#EBF7FD', color: '#54B8DB' }}>{item.category}</span>
+                      {item.recallRegDt && <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{item.recallRegDt.slice(0, 10)}</span>}
+                    </div>
                   </div>
                 </div>
               </Link>

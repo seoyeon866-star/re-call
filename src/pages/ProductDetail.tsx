@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useLocation, Link } from 'react-router-dom'
+import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { getRecallImages } from '../api/consumerRecall'
 import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
 
@@ -33,6 +33,8 @@ export default function ProductDetail() {
     ? buildRecallWithMeta(data.items[0])
     : null
 
+  const navigate = useNavigate()
+
   useEffect(() => {
     if (!item) return
     const name = item.productNm
@@ -60,9 +62,9 @@ export default function ProductDetail() {
     <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box' }}>
       {/* ── Header ── */}
       <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #e2e8f0' }}>
-        <Link to={data?.fromQuery ? `/search?query=${encodeURIComponent(data.fromQuery)}` : '/search'} style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
           <span style={{ fontSize: '1.1rem' }}>&larr;</span> 뒤로
-        </Link>
+        </button>
         <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500 }}>
           검색
         </Link>
