@@ -115,14 +115,18 @@ async function upsertRecall(row: any) {
 async function queryFromDB(column: string, value: string) {
   const sb = getSupabase();
   if (!sb) return null;
-  const { data, error } = await sb
-    .from('recalls')
-    .select('*')
-    .eq(column, value)
-    .order('recall_reg_dt', { ascending: false, nullsFirst: false })
-    .limit(100);
-  if (error) throw error;
-  return data ? data.map(toClient) : [];
+  try {
+    const { data, error } = await sb
+      .from('recalls')
+      .select('*')
+      .eq(column, value)
+      .order('recall_reg_dt', { ascending: false, nullsFirst: false })
+      .limit(100);
+    if (error) throw error;
+    return data ? data.map(toClient) : [];
+  } catch {
+    return null;
+  }
 }
 
 export default async function handler(req: any, res: any) {
