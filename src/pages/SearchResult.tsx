@@ -119,7 +119,7 @@ export default function SearchResult() {
             {items.map((item) => {
               const images = getRecallImages(item)
               return (
-              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item], fromQuery: query }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
                 {images.length > 0 ? (
                   <img src={images[0]} alt={item.productNm} style={{ width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
                 ) : (

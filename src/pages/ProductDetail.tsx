@@ -4,6 +4,7 @@ import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
 
 interface RecallDetailData {
   items: RecallItem[]
+  fromQuery?: string
 }
 
 interface RecallItem {
@@ -42,7 +43,7 @@ export default function ProductDetail() {
     return (
       <div style={{ padding: '64px 16px', textAlign: 'center' }}>
         <p style={{ color: '#94a3b8', marginBottom: '16px' }}>리콜 정보를 불러올 수 없습니다.</p>
-        <Link to="/search" style={{ color: '#3b82f6', fontSize: '0.9rem' }}>검색 결과로 돌아가기</Link>
+        <Link to={data?.fromQuery ? `/search?query=${encodeURIComponent(data.fromQuery)}` : '/search'} style={{ color: '#3b82f6', fontSize: '0.9rem' }}>검색 결과로 돌아가기</Link>
       </div>
     )
   }
@@ -53,7 +54,7 @@ export default function ProductDetail() {
   return (
     <div style={{ maxWidth: '480px', margin: '0 auto', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ padding: '16px', position: 'sticky', top: 0, background: '#fff', zIndex: 10, borderBottom: '1px solid #f1f5f9' }}>
-        <Link to="/search" style={{ textDecoration: 'none', color: '#64748b', fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+        <Link to={data.fromQuery ? `/search?query=${encodeURIComponent(data.fromQuery)}` : '/search'} style={{ textDecoration: 'none', color: '#64748b', fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
           <span>&larr;</span>
           <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>뒤로</span>
         </Link>
