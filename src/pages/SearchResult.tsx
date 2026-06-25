@@ -1,7 +1,8 @@
 import { useEffect, useState, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
-import { searchRecalls, getRecallImages, type RecallItem } from '../api/consumerRecall'
-import { CATEGORIES, buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
+import { searchRecalls, fetchRecentRecalls, getRecallImages, type RecallItem } from '../api/consumerRecall'
+import { CATEGORIES } from '../config/categories'
+import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
 
 const RECALL_SE_OPTIONS = ['리콜', '판매중단', '무상수리', '교환', '환급'] as const
 
@@ -14,6 +15,7 @@ function highlight(text: string, query: string): string {
 export default function SearchResult() {
   const [searchParams] = useSearchParams()
   const query = searchParams.get('query') || ''
+  const category = searchParams.get('category') || ''
 
   const [rawItems, setRawItems] = useState<RecallWithMeta[]>([])
   const [loading, setLoading] = useState(false)
@@ -25,8 +27,10 @@ export default function SearchResult() {
   const [filterCategory, setFilterCategory] = useState('')
   const [filterRiskTag, setFilterRiskTag] = useState('')
 
+  const isCategoryMode = !!category && !query
+
   useEffect(() => {
-    if (!query) { setRawItems([]); return }
+    if (!query && !category) { setRawItems([]); return }
     setLoading(true)
     setError('')
     setFilterRecallSe('')
@@ -34,11 +38,21 @@ export default function SearchResult() {
     setFilterCategory('')
     setFilterRiskTag('')
 
-    searchRecalls(query)
-      .then((items: RecallItem[]) => setRawItems(items.map(buildRecallWithMeta)))
-      .catch(err => setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다'))
-      .finally(() => setLoading(false))
-  }, [query])
+    if (isCategoryMode) {
+      fetchRecentRecalls()
+        .then((items: RecallItem[]) => {
+          const classified = items.map(buildRecallWithMeta)
+          setRawItems(classified.filter(i => i.category === category))
+        })
+        .catch(err => setError(err?.response?.data?.errorMessage || err.message || '카테고리 정보를 불러올 수 없습니다'))
+        .finally(() => setLoading(false))
+    } else {
+      searchRecalls(query)
+        .then((items: RecallItem[]) => setRawItems(items.map(buildRecallWithMeta)))
+        .catch(err => setError(err?.response?.data?.errorMessage || err.message || '검색 중 오류가 발생했습니다'))
+        .finally(() => setLoading(false))
+    }
+  }, [query, category])
 
   const filters = useMemo(() => {
     const countries = [...new Set(rawItems.map(i => i.country).filter(Boolean))].sort()
@@ -57,10 +71,12 @@ export default function SearchResult() {
   }, [rawItems, sortBy, filterRecallSe, filterCountry, filterCategory, filterRiskTag])
 
   return (
-    <div style={{ maxWidth: '480px', margin: '0 auto', padding: '24px 16px 40px', boxSizing: 'border-box', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#F4FBFD', maxWidth: '480px', margin: '0 auto', padding: '24px 16px 40px', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-        <Link to="/" style={{ textDecoration: 'none', color: '#64748b', fontSize: '1.2rem' }}>&larr;</Link>
-        <h2 style={{ margin: 0, fontSize: 'clamp(1rem, 4vw, 1.2rem)', fontWeight: 600, color: '#1e293b', wordBreak: 'break-word' }}>&ldquo;{query}&rdquo; 검색 결과</h2>
+        <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '1.2rem' }}>&larr;</Link>
+        <h2 style={{ margin: 0, fontSize: 'clamp(1rem, 4vw, 1.2rem)', fontWeight: 600, color: '#1e293b', wordBreak: 'break-word' }}>
+          {isCategoryMode ? `${category}` : `&ldquo;${query}&rdquo; 검색 결과`}
+        </h2>
       </div>
 
       {loading && (
@@ -80,13 +96,13 @@ export default function SearchResult() {
       {error && <p style={{ color: '#ef4444', fontSize: '0.9rem', padding: '12px', background: '#fef2f2', borderRadius: '8px' }}>{error}</p>}
 
       {!loading && rawItems.length === 0 && (
-        <p style={{ color: '#94a3b8', textAlign: 'center', padding: '48px 0', fontSize: '0.9rem' }}>검색 결과가 없습니다.</p>
+        <p style={{ color: '#94a3b8', textAlign: 'center', padding: '48px 0', fontSize: '0.9rem' }}>해당 카테고리의 리콜 정보가 없습니다.</p>
       )}
 
       {!loading && rawItems.length > 0 && (
         <>
           <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
-            <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center', background: '#f8fafc', borderRadius: '10px', padding: '4px 8px' }}>
+            <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center', borderRadius: '10px', padding: '4px 8px' }}>
               <span style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap' }}>총 {items.length}건</span>
             </div>
             <select value={sortBy} onChange={e => setSortBy(e.target.value as 'relevance' | 'latest')} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
@@ -97,10 +113,12 @@ export default function SearchResult() {
               <option value="">유형</option>
               {RECALL_SE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
-            <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
-              <option value="">카테고리</option>
-              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
+            {!isCategoryMode && (
+              <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+                <option value="">카테고리</option>
+                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+            )}
             {filters.countries.length > 0 && (
               <select value={filterCountry} onChange={e => setFilterCountry(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
                 <option value="">국가</option>
@@ -119,7 +137,7 @@ export default function SearchResult() {
             {items.map((item) => {
               const images = getRecallImages(item)
               return (
-              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item], fromQuery: query }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#f8fafc', border: '1px solid #f1f5f9' }}>
+              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item], fromQuery: query }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#fff', border: '1px solid #e2e8f0' }}>
                 {images.length > 0 ? (
                   <img src={images[0]} alt={item.productNm} style={{ width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
                 ) : (

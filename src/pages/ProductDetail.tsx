@@ -52,11 +52,11 @@ export default function ProductDetail() {
   const images = getRecallImages(item)
 
   return (
-    <div style={{ maxWidth: '480px', margin: '0 auto', boxSizing: 'border-box', overflowX: 'hidden' }}>
-      <div style={{ padding: '16px', position: 'sticky', top: 0, background: '#fff', zIndex: 10, borderBottom: '1px solid #f1f5f9' }}>
-        <Link to={data.fromQuery ? `/search?query=${encodeURIComponent(data.fromQuery)}` : '/search'} style={{ textDecoration: 'none', color: '#64748b', fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+    <div style={{ minHeight: '100vh', background: '#F4FBFD', maxWidth: '480px', margin: '0 auto', boxSizing: 'border-box', overflowX: 'hidden' }}>
+      <div style={{ padding: '16px', position: 'sticky', top: 0, background: '#fff', zIndex: 10, borderBottom: '1px solid #e2e8f0' }}>
+        <Link to={data.fromQuery ? `/search?query=${encodeURIComponent(data.fromQuery)}` : '/search'} style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '1.2rem', display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
           <span>&larr;</span>
-          <span style={{ fontSize: '0.85rem', color: '#94a3b8' }}>뒤로</span>
+          <span style={{ fontSize: '0.85rem', color: '#54B8DB' }}>뒤로</span>
         </Link>
       </div>
 
@@ -117,7 +117,7 @@ export default function ProductDetail() {
           <a
             href={`https://www.consumer24.go.kr/portal/issue/issueDetail.ibo?cntntsId=${item.cntntsId}`}
             target="_blank" rel="noopener noreferrer"
-            style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: '12px', background: '#3b82f6', color: '#fff', fontSize: '0.9rem', fontWeight: 600, textDecoration: 'none', marginTop: '8px' }}
+            style={{ display: 'block', textAlign: 'center', padding: '12px', borderRadius: '12px', background: '#54B8DB', color: '#fff', fontSize: '0.9rem', fontWeight: 600, textDecoration: 'none', marginTop: '8px' }}
           >
             소비자24 원문 보기
           </a>

@@ -9,10 +9,11 @@ const xmlParser = new XMLParser({
 export default async function handler(req: any, res: any) {
   try {
     const page = req.query?.page || '1';
+    const cntPerPage = req.query?.cntPerPage || '100';
     const url = new URL('https://www.consumer.go.kr/openapi/recall/contents/index.do');
     url.searchParams.set('serviceKey', process.env.CONSUMER24_SERVICE_KEY!);
     url.searchParams.set('pageNo', page);
-    url.searchParams.set('cntPerPage', '20');
+    url.searchParams.set('cntPerPage', cntPerPage);
     url.searchParams.set('cntntsId', '0501');
     url.searchParams.set('productNm', '');
 
