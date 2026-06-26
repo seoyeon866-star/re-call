@@ -123,6 +123,21 @@ export default defineConfig(({ mode }) => {
               res.end(JSON.stringify({ error: 'Failed to fetch from Consumer24 API' }))
             }
           })
+
+          server.middlewares.use('/api/recalls', async (req, res) => {
+            const params = new URL(req.url || '', 'http://localhost').searchParams
+            const target = new URL('https://re-call-three.vercel.app/api/recalls')
+            params.forEach((v, k) => target.searchParams.set(k, v))
+            try {
+              const apiRes = await fetch(target.toString())
+              res.setHeader('Content-Type', 'application/json')
+              res.end(JSON.stringify(await apiRes.json()))
+            } catch {
+              res.statusCode = 500
+              res.setHeader('Content-Type', 'application/json')
+              res.end(JSON.stringify({ error: 'Proxy failed' }))
+            }
+          })
         },
       },
     ],
