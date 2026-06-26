@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { getRecallImages } from '../api/consumerRecall'
-import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
+import { buildRecallWithMeta, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 
 interface AltProduct {
   title: string
@@ -107,7 +107,10 @@ export default function ProductDetail() {
               <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
                 <span style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: '#ef4444', color: '#fff', fontWeight: 600 }}>위험 태그</span>
                 {item.riskTags.map(tag => (
-                  <span key={tag} style={{ fontSize: '0.75rem', padding: '4px 10px', borderRadius: '6px', background: '#fff', color: '#ef4444', fontWeight: 600, border: '1px solid #fecaca' }}>{tag}</span>
+                  <span key={tag} style={{ fontSize: '12px', padding: '2px 4px', borderRadius: '6px', background: '#FCEBEA', color: '#E63429', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
+                    {RISK_ICONS[tag] && <img src={RISK_ICONS[tag]} alt={tag} style={{ width: '12px', height: '12px' }} />}
+                    {tag}
+                  </span>
                 ))}
               </div>
             )}

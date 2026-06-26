@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { useSearchParams, Link } from 'react-router-dom'
 import { searchRecalls, fetchByCategory, getRecallImages } from '../api/consumerRecall'
 import { CATEGORIES } from '../config/categories'
-import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
+import { buildRecallWithMeta, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 
 const RECALL_SE_OPTIONS = ['리콜', '판매중단', '무상수리', '교환', '환급'] as const
 
@@ -141,7 +141,10 @@ export default function SearchResult() {
                     <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#dbeafe', color: '#3b82f6' }}>{item.category}</span>
                     {item.recallSe && <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#fee2e2', color: '#ef4444' }}>{item.recallSe}</span>}
                     {item.riskTags.slice(0, 2).map(tag => (
-                      <span key={tag} style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#fef3c7', color: '#d97706' }}>{tag}</span>
+                      <span key={tag} style={{ fontSize: '12px', padding: '2px 4px', borderRadius: '6px', background: '#FCEBEA', color: '#E63429', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
+                        {RISK_ICONS[tag] && <img src={RISK_ICONS[tag]} alt={tag} style={{ width: '12px', height: '12px' }} />}
+                        {tag}
+                      </span>
                     ))}
                   </div>
                 </div>

@@ -62,3 +62,16 @@ export function buildRecallWithMeta(item: RecallItem) {
 }
 
 export type RecallWithMeta = ReturnType<typeof buildRecallWithMeta>
+
+export const RISK_ICONS: Record<string, string> = {
+  '화재': '/assets/risk/화재.svg',
+  '감전': '/assets/risk/감전.svg',
+  '화상': '/assets/risk/화상.svg',
+  '유해물질': '/assets/risk/유해물질.svg',
+  '질식': '/assets/risk/질식.svg',
+  '상해': '/assets/risk/상해.svg',
+  '알레르기': '/assets/risk/알레르기.svg',
+  '질병': '/assets/risk/질병.svg',
+  '파손': '/assets/risk/파손.svg',
+  '불량': '/assets/risk/불량.svg',
+}
