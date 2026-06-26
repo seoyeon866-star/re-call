@@ -8,16 +8,14 @@ const RECENT_SEARCHES_KEY = 'recent_searches'
 const MAX_RECENT = 8
 
 const CATEGORY_ICONS: Record<string, string> = {
-  '유아동': '/assets/category/유아동.png',
-  '화장품': '/assets/category/화장품.png',
+  '키즈': '/assets/category/키즈.png',
+  '뷰티헬스': '/assets/category/뷰티헬스.png',
   '생활용품': '/assets/category/생활용품.png',
-  '완구류': '/assets/category/완구류.png',
   '의류': '/assets/category/의류.png',
-  '욕실용품': '/assets/category/욕실용품.png',
-  '식품류': '/assets/category/식품류.png',
-  '주방용품': '/assets/category/주방용품.png',
+  '식품키친': '/assets/category/식품키친.png',
+  '차량용품': '/assets/category/차량용품.png',
   '반려동물': '/assets/category/반려동물.png',
-  '전자제품': '/assets/category/전자제품.png',
+  '가전디지털': '/assets/category/가전디지털.png',
 }
 
 function getRecentSearches(): string[] {
