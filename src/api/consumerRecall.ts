@@ -17,6 +17,8 @@ export interface RecallItem {
   aditfield13: string
   recallRegDt?: string
   category?: string
+  infoCreatUrl?: string
+  agencyName?: string
 }
 
 export function getRecallImages(item: RecallItem): string[] {

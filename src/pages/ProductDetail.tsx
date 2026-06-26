@@ -125,15 +125,23 @@ export default function ProductDetail() {
             {item.recallRegDt && <InfoRow label="공표일" value={item.recallRegDt?.slice(0, 10)} />}
             {item.country && <InfoRow label="제조국가" value={item.country} />}
             {item.mainSleoffic && <InfoRow label="주관기관" value={item.mainSleoffic} />}
-            <div style={{ padding: '10px 0' }}>
+            {(item as any).agencyName && (
+              <InfoRow label="리콜 공표기관" value={(item as any).agencyName} />
+            )}
+            <div style={{ padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
               <p style={{ margin: '0 0 2px', fontSize: '0.78rem', color: '#94a3b8' }}>공표문</p>
-              {item.cntntsId ? (
-                <a href={`https://www.consumer24.go.kr/portal/issue/issueDetail.ibo?cntntsId=${item.cntntsId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9rem', color: '#54B8DB', textDecoration: 'none', fontWeight: 500 }}>
-                  소비자24 원문 바로가기 →
-                </a>
-              ) : (
-                <p style={{ margin: 0, fontSize: '0.9rem', color: '#94a3b8' }}>정보 없음</p>
-              )}
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                {item.cntntsId && (
+                  <a href={`https://www.consumer24.go.kr/portal/issue/issueDetail.ibo?cntntsId=${item.cntntsId}`} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9rem', color: '#54B8DB', textDecoration: 'none', fontWeight: 500 }}>
+                    소비자24 원문 →
+                  </a>
+                )}
+                {(item as any).infoCreatUrl && (
+                  <a href={(item as any).infoCreatUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: '0.9rem', color: '#54B8DB', textDecoration: 'none', fontWeight: 500 }}>
+                    원본 리콜 공고 →
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>

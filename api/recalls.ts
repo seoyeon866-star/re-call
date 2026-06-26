@@ -30,6 +30,42 @@ const CATEGORY_RULES: { category: string; keywords: string[] }[] = [
   { category: '전자제품', keywords: ['보조배터리', '충전기', '배터리', '전원', 'USB', '케이블', '이어폰', '헤드폰', '어댑터', '전기', 'LED', '램프', '조명', '선풍기', '히터', '가습기', '공기청정기', '드라이기', '면도기', '전기장판', '온수기', '전자레인지', '믹서기', '블렌더', '전자', '충전', '어댑터', '파워뱅크', '배터리팩', '스피커', '마우스', '키보드', '모니터', '노트북'] },
 ];
 
+const DOMAIN_MAP: Record<string, string> = {
+  'ec.europa.eu': '유럽 집행위원회',
+  'www.cpsc.gov': '미국 CPSC',
+  'cpsc.gov': '미국 CPSC',
+  'recalls-rappels.canada.ca': '캐나다 보건부',
+  'www.safetykorea.kr': '한국 제품안전정보센터',
+  'www.fda.gov.tw': '대만 FDA',
+  'favv-afsca.be': '벨기에 AFSCA',
+  'www.productsafety.govt.nz': '뉴질랜드 MBIE',
+  'apps.tga.gov.au': '호주 TGA',
+  'www.productsafety.gov.au': '호주 제품안전청',
+  'conformityhub.moiat.gov.ae': 'UAE MOIAT',
+  'www.recall.caa.go.jp': '일본 소비자청',
+  'www.gov.uk': '영국 OPSS',
+  'www.bsmi.gov.tw': '대만 BSMI',
+  'reventazon.meic.go.cr': '코스타리카 MEIC',
+  'www.foodstandards.gov.au': '호주 FSANZ',
+  'www.food.gov.uk': '영국 FSA',
+  'www.fsai.ie': '아일랜드 FSAI',
+  'www.lebensmittelwarnung.de': '독일 BVL',
+  'www.baua.de': '독일 BAuA',
+  'www.nvwa.nl': '네덜란드 NVWA',
+  'wwwapps.tc.gc.ca': '캐나다 교통부',
+  'rappel.conso.gouv.fr': '프랑스 소비자청',
+  'www.fda.gov': '미국 FDA',
+}
+
+function getAgencyName(url: string): string {
+  try {
+    const host = new URL(url).hostname
+    return DOMAIN_MAP[host] || host
+  } catch {
+    return ''
+  }
+}
+
 function classifyCategory(productNm: string, shrtcomCn: string, modlNmInfo: string): string {
   const text = `${productNm} ${shrtcomCn} ${modlNmInfo}`.toLowerCase();
   let best: { category: string; score: number } = { category: '기타', score: 0 };
@@ -61,6 +97,7 @@ function toRow(raw: Record<string, unknown>) {
     cnsmr_ghvr_tips: (raw.cnsmrGhvrTips as string) || '',
     aditfield13: (raw.aditfield13 as string) || '',
     recall_reg_dt: (raw.recallRegDt as string) || '',
+    info_creat_url: (raw.infoCreatUrl as string) || '',
     category,
   };
 }
@@ -83,6 +120,8 @@ function toClient(row: any) {
     aditfield13: row.aditfield13,
     recallRegDt: row.recall_reg_dt,
     category: row.category,
+    infoCreatUrl: row.info_creat_url || '',
+    agencyName: getAgencyName(row.info_creat_url || ''),
   };
 }
 
