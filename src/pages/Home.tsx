@@ -1,6 +1,6 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { fetchRecentRecalls, getRecallImages } from '../api/consumerRecall'
+import { fetchRecentRecalls, getRecallImages, handleImgError } from '../api/consumerRecall'
 import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
 import { CATEGORIES } from '../config/categories'
 
@@ -139,7 +139,7 @@ export default function Home() {
                 <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>
                   <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>
                     {images.length > 0 ? (
-                      <img src={images[0]} alt={item.productNm} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <img src={images[0]} alt={item.productNm} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => handleImgError(e, item.category)} />
                     ) : '?'}
                   </div>
                   <div style={{ padding: '10px' }}>

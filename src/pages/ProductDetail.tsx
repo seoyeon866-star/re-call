@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
-import { getRecallImages } from '../api/consumerRecall'
+import { getRecallImages, handleImgError } from '../api/consumerRecall'
 import { buildRecallWithMeta, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 
 interface AltProduct {
@@ -73,7 +73,7 @@ export default function ProductDetail() {
       {/* ── Image ── */}
       <div style={{ background: '#f8fafc', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'clamp(200px, 50vw, 320px)' }}>
         {images.length > 0 ? (
-          <img src={images[0]} alt={item.productNm} style={{ width: '100%', maxHeight: 'clamp(200px, 50vw, 320px)', objectFit: 'cover' }} />
+          <img src={images[0]} alt={item.productNm} style={{ width: '100%', maxHeight: 'clamp(200px, 50vw, 320px)', objectFit: 'cover' }} onError={(e) => handleImgError(e, item.category)} />
         ) : (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: '#cbd5e1', width: '100%', height: 'clamp(200px, 50vw, 320px)' }}>
             ?

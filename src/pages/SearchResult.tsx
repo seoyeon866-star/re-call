@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { searchRecalls, fetchByCategory, getRecallImages } from '../api/consumerRecall'
+import { searchRecalls, fetchByCategory, getRecallImages, handleImgError } from '../api/consumerRecall'
 import { CATEGORIES } from '../config/categories'
 import { buildRecallWithMeta, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 
@@ -131,7 +131,7 @@ export default function SearchResult() {
               return (
               <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item], fromQuery: query }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#fff', border: '1px solid #e2e8f0' }}>
                 {images.length > 0 ? (
-                  <img src={images[0]} alt={item.productNm} style={{ width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none' }} />
+                  <img src={images[0]} alt={item.productNm} style={{ width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} onError={(e) => handleImgError(e, item.category)} />
                 ) : (
                   <div style={{ width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', borderRadius: '8px', background: '#e2e8f0', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>?</div>
                 )}
