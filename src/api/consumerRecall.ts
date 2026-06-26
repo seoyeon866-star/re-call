@@ -23,7 +23,11 @@ export interface RecallItem {
 
 export function getRecallImages(item: RecallItem): string[] {
   if (!item.recallImgUrls) return []
-  return item.recallImgUrls.split(',').map(s => s.trim()).filter(Boolean)
+  return item.recallImgUrls.split(',').map(s => s.trim()).filter(Boolean).map(url => {
+    const match = url.match(/atchmnflId=([^&]+)/)
+    if (match) return `/api/img?id=${match[1]}`
+    return url
+  })
 }
 
 export async function searchRecalls(keyword: string): Promise<RecallItem[]> {
