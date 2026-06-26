@@ -86,10 +86,6 @@ export default function SearchResult() {
       )}
       {error && <p style={{ color: '#ef4444', fontSize: '0.9rem', padding: '12px', background: '#fef2f2', borderRadius: '8px' }}>{error}</p>}
 
-      <div style={{ fontSize: '0.7rem', color: '#94a3b8', padding: '8px', background: '#f8fafc', borderRadius: '8px', marginBottom: '12px' }}>
-        mode: {isCategoryMode ? 'category' : 'search'} | query: "{query}" | category: "{category}" | items: {rawItems.length} | loading: {loading ? 'Y' : 'N'} | error: {error || '-'}
-      </div>
-
       {!loading && rawItems.length === 0 && !error && (
         <p style={{ color: '#94a3b8', textAlign: 'center', padding: '48px 0', fontSize: '0.9rem' }}>해당 카테고리의 리콜 정보가 없습니다.</p>
       )}
