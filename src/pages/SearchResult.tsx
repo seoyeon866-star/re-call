@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react'
-import { useSearchParams, Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { searchRecalls, fetchByCategory, getRecallImages } from '../api/consumerRecall'
 import { CATEGORIES } from '../config/categories'
 import { buildRecallWithMeta, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
@@ -7,9 +7,10 @@ import { buildRecallWithMeta, RISK_ICONS, type RecallWithMeta } from '../lib/cla
 const RECALL_SE_OPTIONS = ['리콜', '판매중단', '무상수리', '교환', '환급'] as const
 
 export default function SearchResult() {
-  const [searchParams] = useSearchParams()
-  const query = searchParams.get('query') || ''
-  const category = searchParams.get('category') || ''
+  const location = useLocation()
+  const params = new URLSearchParams(location.search)
+  const query = params.get('query') || ''
+  const category = params.get('category') || ''
 
   const [rawItems, setRawItems] = useState<RecallWithMeta[]>([])
   const [loading, setLoading] = useState(false)

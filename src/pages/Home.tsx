@@ -56,7 +56,7 @@ export default function Home() {
   }
 
   const handleCategoryClick = (cat: string) => {
-    navigate(`/search?category=${encodeURIComponent(cat)}`)
+    window.location.href = `/search?category=${encodeURIComponent(cat)}`
   }
 
   return (
