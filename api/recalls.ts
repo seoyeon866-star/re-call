@@ -155,7 +155,7 @@ async function queryDBRecent() {
   if (!sb) return null;
   try {
     const q = applyImageFilter(sb.from('recalls').select('*'));
-    const { data, error } = await q.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100);
+    const { data, error } = await q.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(5);
     if (error) throw error;
     return data && data.length > 0 ? data.map(toClient) : null;
   } catch { return null; }
