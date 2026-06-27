@@ -106,16 +106,6 @@ export default function ProductDetail() {
         <div style={{ marginTop: '24px' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 10px' }}>결함 내용</h2>
           <div style={{ background: '#FEF2F2', borderRadius: '12px', padding: '16px' }}>
-            {item.riskTags.length > 0 && (
-              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '12px' }}>
-                {item.riskTags.map(tag => (
-                  <span key={tag} style={{ fontSize: '12px', padding: '2px 4px', borderRadius: '6px', background: '#FCEBEA', color: '#E63429', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
-                    {RISK_ICONS[tag] && <img src={RISK_ICONS[tag]} alt={tag} style={{ width: '12px', height: '12px' }} />}
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            )}
             <p style={{ margin: 0, fontSize: '0.9rem', color: '#1e293b', lineHeight: 1.6, wordBreak: 'break-word', whiteSpace: 'pre-wrap' }}>{item.shrtcomCn || '정보 없음'}</p>
           </div>
         </div>
