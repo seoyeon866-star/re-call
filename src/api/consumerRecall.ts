@@ -23,7 +23,13 @@ export interface RecallItem {
 
 export function getRecallImages(item: RecallItem): string[] {
   if (!item.recallImgUrls) return []
-  return item.recallImgUrls.split(',').map(s => s.trim()).filter(Boolean)
+  return item.recallImgUrls.split(',').map(s => {
+    const url = s.trim()
+    if (!url) return ''
+    const match = url.match(/atchmnflId=([^&]+)/)
+    if (match) return '/api/img?id=' + match[1]
+    return url
+  }).filter(Boolean)
 }
 
 const FALLBACK_MAP: Record<string, string> = {

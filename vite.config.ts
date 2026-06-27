@@ -124,6 +124,22 @@ export default defineConfig(({ mode }) => {
             }
           })
 
+          server.middlewares.use('/api/img', async (req, res) => {
+            const id = new URL(req.url || '', 'http://localhost').searchParams.get('id')
+            if (!id) { res.statusCode = 400; res.end('Missing id'); return }
+            try {
+              const r = await fetch(
+                `https://www.consumer.go.kr/openapi/recall/contents/recallApiImage.do?atchmnflId=${id}&serviceKey=${env.CONSUMER24_SERVICE_KEY}`,
+                { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; re-call/1.0)', 'Referer': 'https://www.consumer.go.kr/' } }
+              )
+              const buffer = await r.arrayBuffer()
+              if (buffer.byteLength === 0) { res.statusCode = 502; res.end(); return }
+              res.setHeader('Content-Type', r.headers.get('content-type') || 'image/jpeg')
+              res.setHeader('Cache-Control', 'public, max-age=86400')
+              res.end(Buffer.from(buffer))
+            } catch { res.statusCode = 500; res.end() }
+          })
+
           server.middlewares.use('/api/recalls', async (req, res) => {
             const params = new URL(req.url || '', 'http://localhost').searchParams
             const { createClient } = await import('@supabase/supabase-js')

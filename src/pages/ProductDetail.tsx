@@ -71,11 +71,11 @@ export default function ProductDetail() {
       </div>
 
       {/* ── Image ── */}
-      <div style={{ background: '#f8fafc', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 'clamp(200px, 50vw, 320px)' }}>
+      <div style={{ background: '#f8fafc', display: 'flex', justifyContent: 'center', alignItems: 'center', aspectRatio: '1/1', maxHeight: 'clamp(280px, 60vw, 400px)', margin: '0 auto' }}>
         {images.length > 0 ? (
-          <img src={images[0]} alt={item.productNm} style={{ width: '100%', maxHeight: 'clamp(200px, 50vw, 320px)', objectFit: 'cover' }} onError={(e) => handleImgError(e, item.category)} />
+          <img src={images[0]} alt={item.productNm} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => handleImgError(e, item.category)} />
         ) : (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: '#cbd5e1', width: '100%', height: 'clamp(200px, 50vw, 320px)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem', color: '#cbd5e1', width: '100%', height: '100%' }}>
             ?
           </div>
         )}
