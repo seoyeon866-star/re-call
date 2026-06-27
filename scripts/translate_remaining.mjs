@@ -36,12 +36,10 @@ async function main() {
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i];
-    let makr_ko = r.makr;
-    if (r.makr && /[a-zA-Z]/.test(r.makr)) makr_ko = await gt(r.makr);
     const desc_ko = await gt(r.shrtcom_cn);
 
-    if (makr_ko !== r.makr || desc_ko !== r.shrtcom_cn) {
-      await sb.from('recalls').update({ makr: makr_ko, shrtcom_cn: desc_ko }).eq('recall_sn', r.recall_sn);
+    if (desc_ko !== r.shrtcom_cn) {
+      await sb.from('recalls').update({ shrtcom_cn: desc_ko }).eq('recall_sn', r.recall_sn);
     }
     await new Promise(r => setTimeout(r, 500));
     if ((i + 1) % 10 === 0) console.log(Math.round((i + 1) / rows.length * 100) + '% | ' + (i + 1) + '/' + rows.length);
