@@ -126,16 +126,54 @@ export default defineConfig(({ mode }) => {
 
           server.middlewares.use('/api/recalls', async (req, res) => {
             const params = new URL(req.url || '', 'http://localhost').searchParams
-            const target = new URL('https://re-call-three.vercel.app/api/recalls')
-            params.forEach((v, k) => target.searchParams.set(k, v))
+            const { createClient } = await import('@supabase/supabase-js')
+            const sb = createClient(env.SUPABASE_URL, env.SUPABASE_SERVICE_ROLE_KEY)
+
+            function toClient(row: any) {
+              const DOMAIN_MAP: Record<string, string> = {
+                'ec.europa.eu': '유럽 집행위원회',
+                'www.cpsc.gov': '미국 CPSC',
+                'recalls-rappels.canada.ca': '캐나다 보건부',
+                'www.safetykorea.kr': '한국 제품안전정보센터',
+                'www.recall.caa.go.jp': '일본 소비자청',
+                'www.gov.uk': '영국 OPSS',
+                'www.fda.gov': '미국 FDA',
+              }
+              let agency = ''
+              try { const host = new URL(row.info_creat_url || '').hostname; agency = DOMAIN_MAP[host] || host } catch {}
+              return {
+                recallSn: row.recall_sn, cntntsId: row.cntnts_id, productNm: row.product_nm,
+                makr: row.makr, bsnmNm: row.bsnm_nm, modlNmInfo: row.modl_nm_info,
+                shrtcomCn: row.shrtcom_cn, recallSe: row.recall_se, hrmflGrad: row.hrmfl_grad,
+                mainSleoffic: row.main_sleoffic, recallImgUrls: row.recall_img_urls,
+                injryCauseResult: row.injry_cause_result, cnsmrGhvrTips: row.cnsmr_ghvr_tips,
+                aditfield13: row.aditfield13, recallRegDt: row.recall_reg_dt,
+                category: row.category, infoCreatUrl: row.info_creat_url || '', agencyName: agency,
+              }
+            }
+
             try {
-              const apiRes = await fetch(target.toString())
+              const { q, category, recent } = Object.fromEntries(params)
+              let query = sb.from('recalls').select('*').not('recall_img_urls', 'is', null).neq('recall_img_urls', '')
+
+              if (category) {
+                query = query.eq('category', category).order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100)
+              } else if (recent === 'true') {
+                query = query.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(5)
+              } else if (q) {
+                query = query.or(`product_nm.ilike.%${q}%,makr.ilike.%${q}%,bsnm_nm.ilike.%${q}%`).order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100)
+              } else {
+                res.statusCode = 400; res.end(JSON.stringify({ error: 'Missing query' })); return
+              }
+
+              const { data, error } = await query
+              if (error) { res.statusCode = 500; res.end(JSON.stringify({ error: error.message })); return }
               res.setHeader('Content-Type', 'application/json')
-              res.end(JSON.stringify(await apiRes.json()))
-            } catch {
+              res.end(JSON.stringify({ items: (data || []).map(toClient), source: 'db' }))
+            } catch (e: any) {
               res.statusCode = 500
               res.setHeader('Content-Type', 'application/json')
-              res.end(JSON.stringify({ error: 'Proxy failed' }))
+              res.end(JSON.stringify({ error: e.message || 'Internal error' }))
             }
           })
         },
