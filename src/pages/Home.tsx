@@ -132,17 +132,17 @@ export default function Home() {
             <p style={{ color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', padding: '32px 0' }}>리콜 정보를 불러올 수 없습니다.</p>
           )}
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
-            {recentRecalls.filter(item => getRecallImages(item).length > 0).slice(0, 5).map((item) => {
+            {recentRecalls.filter(item => getRecallImages(item).length > 0).map((item) => {
               const images = getRecallImages(item)
               return (
               <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(130px, 38vw, 170px)' }}>
-                <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>
-                  <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>
+                <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1', flexShrink: 0 }}>
                     {images.length > 0 ? (
                       <img src={images[0]} alt={item.productNm} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => handleImgError(e, item.category)} />
                     ) : '?'}
                   </div>
-                  <div style={{ padding: '10px' }}>
+                  <div style={{ padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: '#1e293b', fontWeight: 600, wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{item.productNm}</p>
                     <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
                       <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '6px', background: '#EBF7FD', color: '#54B8DB' }}>{item.category}</span>

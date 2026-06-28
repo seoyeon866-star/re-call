@@ -154,10 +154,14 @@ async function queryDBRecent() {
   const sb = getSupabase();
   if (!sb) return null;
   try {
-    const q = applyImageFilter(sb.from('recalls').select('*'));
-    const { data, error } = await q.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(5);
-    if (error) throw error;
-    return data && data.length > 0 ? data.map(toClient) : null;
+    const categories = ['키즈', '뷰티·헬스', '생활용품', '의류', '식품·키친', '차량용품', '반려동물', '가전·디지털'];
+    const results: any[] = [];
+    for (const cat of categories) {
+      const q = applyImageFilter(sb.from('recalls').select('*').eq('category', cat));
+      const { data, error } = await q.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(1);
+      if (!error && data && data.length > 0) results.push(data[0]);
+    }
+    return results.length > 0 ? results.map(toClient) : null;
   } catch { return null; }
 }
 
