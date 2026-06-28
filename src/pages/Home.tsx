@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { fetchRecentRecalls, getRecallImages, handleImgError } from '../api/consumerRecall'
-import { buildRecallWithMeta, type RecallWithMeta } from '../lib/classify'
+import { buildRecallWithMeta, parseProductName, type RecallWithMeta } from '../lib/classify'
 import { CATEGORIES } from '../config/categories'
 
 const RECENT_SEARCHES_KEY = 'recent_searches'
@@ -143,7 +143,14 @@ export default function Home() {
                     ) : '?'}
                   </div>
                   <div style={{ padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: '#1e293b', fontWeight: 600, wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{item.productNm}</p>
+                    {(() => { const parsed = parseProductName(item.productNm); return parsed ? (
+                      <div style={{ margin: '0 0 4px' }}>
+                        {parsed.brand && <p style={{ margin: 0, fontSize: '0.6rem', color: '#94a3b8', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{parsed.brand}</p>}
+                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#1e293b', fontWeight: 600, wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: parsed.brand ? 1 : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{parsed.product}</p>
+                      </div>
+                    ) : (
+                      <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: '#1e293b', fontWeight: 600, wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{item.productNm}</p>
+                    )})()}
                     <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
                       <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '6px', background: '#EBF7FD', color: '#54B8DB' }}>{item.category}</span>
                       {item.recallRegDt && <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{item.recallRegDt.slice(0, 10)}</span>}

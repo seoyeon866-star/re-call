@@ -63,6 +63,17 @@ export function buildRecallWithMeta(item: RecallItem) {
 
 export type RecallWithMeta = ReturnType<typeof buildRecallWithMeta>
 
+export function parseProductName(productNm: string): { brand: string; product: string } | null {
+  const parts = productNm.split(' ; ')
+  if (parts.length >= 3) {
+    return { brand: parts[1].trim(), product: parts.slice(2).join(' ; ').trim() }
+  }
+  if (parts.length === 2) {
+    return { brand: '', product: productNm }
+  }
+  return null
+}
+
 export const RISK_ICONS: Record<string, string> = {
   '화재': '/assets/risk/화재.svg',
   '감전': '/assets/risk/감전.svg',

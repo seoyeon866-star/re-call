@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { getRecallImages, handleImgError } from '../api/consumerRecall'
-import { buildRecallWithMeta, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
+import { buildRecallWithMeta, parseProductName, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 
 interface AltProduct {
   title: string
@@ -86,9 +86,16 @@ export default function ProductDetail() {
         {item.makr && item.makr !== '-' && (
           <p style={{ margin: '0 0 4px', fontSize: '0.8rem', color: '#94a3b8' }}>{item.makr}</p>
         )}
-        <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.2rem, 5vw, 1.4rem)', fontWeight: 700, color: '#1e293b', lineHeight: 1.3, wordBreak: 'break-word' }}>
-          {item.productNm}
-        </h1>
+        {(() => { const parsed = parseProductName(item.productNm); return parsed ? (
+          <div style={{ margin: '0 0 12px' }}>
+            {parsed.brand && <p style={{ margin: '0 0 2px', fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.3 }}>{parsed.brand}</p>}
+            <h1 style={{ margin: 0, fontSize: 'clamp(1.2rem, 5vw, 1.4rem)', fontWeight: 700, color: '#1e293b', lineHeight: 1.3, wordBreak: 'break-word' }}>{parsed.product}</h1>
+          </div>
+        ) : (
+          <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.2rem, 5vw, 1.4rem)', fontWeight: 700, color: '#1e293b', lineHeight: 1.3, wordBreak: 'break-word' }}>
+            {item.productNm}
+          </h1>
+        )})()}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
           {item.riskTags.map(tag => (

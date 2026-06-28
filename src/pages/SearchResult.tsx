@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { searchRecalls, fetchByCategory, getRecallImages, handleImgError } from '../api/consumerRecall'
 import { CATEGORIES } from '../config/categories'
-import { buildRecallWithMeta, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
+import { buildRecallWithMeta, parseProductName, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 
 const RECALL_SE_OPTIONS = ['리콜', '판매중단', '무상수리', '교환', '환급'] as const
 
@@ -136,7 +136,14 @@ export default function SearchResult() {
                   <div style={{ width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', borderRadius: '8px', background: '#e2e8f0', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>?</div>
                 )}
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                  <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.3, color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.productNm}</h3>
+                  {(() => { const parsed = parseProductName(item.productNm); return parsed ? (
+                    <div style={{ margin: 0 }}>
+                      {parsed.brand && <p style={{ margin: 0, fontSize: '0.68rem', color: '#94a3b8', lineHeight: 1.2 }}>{parsed.brand}</p>}
+                      <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.3, color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 1, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{parsed.product}</h3>
+                    </div>
+                  ) : (
+                    <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.3, color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{item.productNm}</h3>
+                  )})()}
                   {item.makr && item.makr !== '-' && <p style={{ margin: 0, fontSize: '0.78rem', color: '#94a3b8' }}>{item.makr}</p>}
                   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center', marginTop: '2px' }}>
                     <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#dbeafe', color: '#3b82f6' }}>{item.category}</span>
