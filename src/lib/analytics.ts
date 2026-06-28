@@ -45,10 +45,10 @@ function checkTask1Completion() {
     const diffSec = ((end - start) / 1000).toFixed(1)
     const msg = `Task 1 Completion Time: ${diffSec} sec`
     console.log(msg)
-    // Also push to dataLayer
+    // Push to dataLayer
     try {
       if (typeof window !== 'undefined' && (window as any).dataLayer) {
-        (window as any).dataLayer.push({ event: 'task1_complete', completionTimeSec: parseFloat(diffSec) })
+        (window as any).dataLayer.push({ event: 'task_complete', task: 1, completionTimeSec: parseFloat(diffSec) })
       }
     } catch {}
   } catch {}
