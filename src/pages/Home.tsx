@@ -119,7 +119,7 @@ export default function Home() {
                 <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1', flexShrink: 0 }}>
                     {images.length > 0 ? (
-                      <img src={images[0]} alt={item.productNm} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => handleImgError(e, item.category)} />
+                      <img src={images[0]} alt={item.productNm} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => handleImgError(e, item.category)} />
                     ) : '?'}
                   </div>
                   <div style={{ padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>

@@ -159,7 +159,7 @@ export default function ProductDetail() {
                 <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9' }}>
                     {relImages.length > 0 ? (
-                      <img src={relImages[0]} alt={rel.productNm} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => handleImgError(e, rel.category)} />
+                      <img src={relImages[0]} alt={rel.productNm} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => handleImgError(e, rel.category)} />
                     ) : (
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#cbd5e1' }}>?</div>
                     )}
