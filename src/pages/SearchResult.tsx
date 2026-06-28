@@ -132,7 +132,7 @@ export default function SearchResult() {
               <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item], fromQuery: query }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#fff', border: '1px solid #e2e8f0' }}>
                 <div style={{ position: 'relative', width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', flexShrink: 0, borderRadius: '8px', overflow: 'hidden', background: '#e2e8f0' }}>
                   {images.length > 0 ? (
-                    <img src={images[0]} alt={item.productNm} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => handleImgError(e, item.category)} />
+                    <img src={images[0]} alt={item.productNm} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => handleImgError(e, item.category)} />
                   ) : (
                     <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>?</div>
                   )}
