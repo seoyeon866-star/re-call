@@ -150,7 +150,7 @@ export default function ProductDetail() {
 
       {/* ── Related recalls ── */}
       {relatedItems.length > 0 && (
-        <div style={{ padding: '0 16px 24px' }}>
+        <div style={{ padding: '24px 16px 24px' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 4px' }}>관련 리콜 정보</h2>
           <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 16px' }}>같은 카테고리의 유사 리콜 제품입니다.</p>
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
