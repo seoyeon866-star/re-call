@@ -25,6 +25,7 @@ export default function Home() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    logEvent('home_view')
     fetchRecentRecalls()
       .then(items => setRecentRecalls(items.map(buildRecallWithMeta)))
       .catch(() => {})

@@ -27,6 +27,31 @@ export function logEvent(event_name: string, event_data: Record<string, string |
       (window as any).dataLayer.push(payload)
     }
   } catch {}
+
+  // Check Task 1 completion: home_view → detail_view (스탠리 1913 스위치백 텀블러)
+  if (event_name === 'detail_view' && event_data.productName === '스탠리 1913 스위치백 텀블러') {
+    checkTask1Completion()
+  }
+}
+
+function checkTask1Completion() {
+  try {
+    const events = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') as UtEvent[]
+    const homeEvent = events.find(e => e.event_name === 'home_view')
+    const detailEvent = events.find(e => e.event_name === 'detail_view' && e.event_data.productName === '스탠리 1913 스위치백 텀블러')
+    if (!homeEvent || !detailEvent) return
+    const start = new Date(homeEvent.timestamp).getTime()
+    const end = new Date(detailEvent.timestamp).getTime()
+    const diffSec = ((end - start) / 1000).toFixed(1)
+    const msg = `Task 1 Completion Time: ${diffSec} sec`
+    console.log(msg)
+    // Also push to dataLayer
+    try {
+      if (typeof window !== 'undefined' && (window as any).dataLayer) {
+        (window as any).dataLayer.push({ event: 'task1_complete', completionTimeSec: parseFloat(diffSec) })
+      }
+    } catch {}
+  } catch {}
 }
 
 export function getEvents(): UtEvent[] {
