@@ -157,11 +157,11 @@ export default function ProductDetail() {
               return (
               <Link key={rel.recallSn} to={`/recall/${rel.recallSn}`} state={{ items: [rel] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(120px, 35vw, 160px)' }}>
                 <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9' }}>
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', background: '#f1f5f9' }}>
                     {relImages.length > 0 ? (
-                      <img src={relImages[0]} alt={rel.productNm} style={{ width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => handleImgError(e, rel.category)} />
+                      <img src={relImages[0]} alt={rel.productNm} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain' }} onError={(e) => handleImgError(e, rel.category)} />
                     ) : (
-                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#cbd5e1' }}>?</div>
+                      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#cbd5e1' }}>?</div>
                     )}
                   </div>
                   <div style={{ padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -200,10 +200,12 @@ export default function ProductDetail() {
             {altItems.slice(0, 6).map((alt, idx) => (
               <a key={idx} href={alt.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(120px, 35vw, 160px)' }}>
                 <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>
-                  <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', background: '#f1f5f9' }}>
                     {alt.image ? (
-                      <img src={alt.image} alt={alt.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : '?'}
+                      <img src={alt.image} alt={alt.title} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
+                    ) : (
+                      <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', color: '#cbd5e1' }}>?</div>
+                    )}
                   </div>
                   <div style={{ padding: '10px' }}>
                     <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{alt.title}</p>
