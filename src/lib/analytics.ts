@@ -7,7 +7,12 @@ interface UtEvent {
 }
 
 export function logEvent(event_name: string, event_data: Record<string, string | number> = {}) {
+  const payload = {
+    event: event_name,
+    ...event_data,
+  }
   try {
+    // localStorage backup
     const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]')
     stored.push({
       event_name,
@@ -15,6 +20,12 @@ export function logEvent(event_name: string, event_data: Record<string, string |
       timestamp: new Date().toISOString(),
     })
     localStorage.setItem(STORAGE_KEY, JSON.stringify(stored))
+  } catch {}
+  // GTM dataLayer push
+  try {
+    if (typeof window !== 'undefined' && (window as any).dataLayer) {
+      (window as any).dataLayer.push(payload)
+    }
   } catch {}
 }
 
