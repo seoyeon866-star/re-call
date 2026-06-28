@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import { fetchRecentRecalls, getRecallImages, handleImgError } from '../api/consumerRecall'
 import { buildRecallWithMeta, parseProductName, type RecallWithMeta } from '../lib/classify'
 import { CATEGORIES } from '../config/categories'
+import { logEvent } from '../lib/analytics'
 
 const RECOMMENDED_KEYWORDS = ['영양제', '장난감', '텀블러', '충전기']
 
@@ -34,10 +35,12 @@ export default function Home() {
     e.preventDefault()
     const trimmed = query.trim()
     if (!trimmed) return
+    logEvent('search_start', { keyword: trimmed })
     navigate(`/search?query=${encodeURIComponent(trimmed)}`)
   }
 
   const handleCategoryClick = (cat: string) => {
+    logEvent('category_click', { category: cat })
     window.location.href = `/search?category=${encodeURIComponent(cat)}`
   }
 
@@ -76,7 +79,7 @@ export default function Home() {
           <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 10px' }}>추천 검색어</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {RECOMMENDED_KEYWORDS.map(term => (
-              <button key={term} onClick={() => navigate(`/search?query=${encodeURIComponent(term)}`)} style={{
+              <button key={term} onClick={() => { logEvent('recommend_keyword_click', { keyword: term }); navigate(`/search?query=${encodeURIComponent(term)}`) }} style={{
                 padding: '6px 14px', borderRadius: '20px', border: '1px solid #54B8DB',
                 background: '#EBF7FD', fontSize: '0.8rem', color: '#54B8DB', cursor: 'pointer', fontWeight: 500,
               }}>{term}</button>

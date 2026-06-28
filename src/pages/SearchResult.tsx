@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom'
 import { searchRecalls, fetchByCategory, getRecallImages, handleImgError } from '../api/consumerRecall'
 import { CATEGORIES } from '../config/categories'
 import { buildRecallWithMeta, parseProductName, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
+import { logEvent } from '../lib/analytics'
 
 const RECALL_SE_OPTIONS = ['리콜', '판매중단', '무상수리', '교환', '환급'] as const
 
@@ -97,28 +98,28 @@ export default function SearchResult() {
             <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center', borderRadius: '10px', padding: '4px 8px' }}>
               <span style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap' }}>총 {items.length}건</span>
             </div>
-            <select value={sortBy} onChange={e => setSortBy(e.target.value as 'relevance' | 'latest')} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+            <select value={sortBy} onChange={e => { const v = e.target.value; setSortBy(v as 'relevance' | 'latest'); logEvent('filter_apply', { sort: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
               <option value="relevance">관련도순</option>
               <option value="latest">최신순</option>
             </select>
-            <select value={filterRecallSe} onChange={e => setFilterRecallSe(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+            <select value={filterRecallSe} onChange={e => { const v = e.target.value; setFilterRecallSe(v); if (v) logEvent('filter_apply', { recallSe: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
               <option value="">유형</option>
               {RECALL_SE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
             </select>
             {!isCategoryMode && (
-              <select value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+              <select value={filterCategory} onChange={e => { const v = e.target.value; setFilterCategory(v); if (v) logEvent('filter_apply', { category: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
                 <option value="">카테고리</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             )}
             {filters.countries.length > 0 && (
-              <select value={filterCountry} onChange={e => setFilterCountry(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+              <select value={filterCountry} onChange={e => { const v = e.target.value; setFilterCountry(v); if (v) logEvent('filter_apply', { country: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
                 <option value="">국가</option>
                 {filters.countries.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             )}
             {filters.riskTags.length > 0 && (
-              <select value={filterRiskTag} onChange={e => setFilterRiskTag(e.target.value)} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+              <select value={filterRiskTag} onChange={e => { const v = e.target.value; setFilterRiskTag(v); if (v) logEvent('filter_apply', { riskTag: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
                 <option value="">위험</option>
                 {filters.riskTags.map(t => <option key={t} value={t}>{t}</option>)}
               </select>
@@ -126,10 +127,10 @@ export default function SearchResult() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-            {items.map((item) => {
+                {items.map((item, idx) => {
               const images = getRecallImages(item)
               return (
-              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item], fromQuery: query }} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#fff', border: '1px solid #e2e8f0' }}>
+              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item], fromQuery: query }} onClick={() => logEvent('search_result_click', { productName: item.productNm, index: idx })} style={{ textDecoration: 'none', color: 'inherit', display: 'flex', gap: '12px', padding: '12px', borderRadius: '12px', background: '#fff', border: '1px solid #e2e8f0' }}>
                 <div style={{ position: 'relative', width: 'clamp(64px, 20vw, 80px)', height: 'clamp(64px, 20vw, 80px)', flexShrink: 0, borderRadius: '8px', overflow: 'hidden', background: '#e2e8f0' }}>
                   {images.length > 0 ? (
                     <img src={images[0]} alt={item.productNm} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => handleImgError(e, item.category)} />

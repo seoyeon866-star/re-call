@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
 import { getRecallImages, handleImgError, fetchRelatedRecalls } from '../api/consumerRecall'
 import { buildRecallWithMeta, parseProductName, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
+import { logEvent } from '../lib/analytics'
 
 interface AltProduct {
   title: string
@@ -38,6 +39,7 @@ export default function ProductDetail() {
 
   useEffect(() => {
     if (!item) return
+    logEvent('detail_view', { productName: item.productNm })
     const name = item.productNm
     if (!name) return
     fetch(`/api/alternatives?productNm=${encodeURIComponent(name)}`)
@@ -155,7 +157,7 @@ export default function ProductDetail() {
             {relatedItems.map((rel) => {
               const relImages = getRecallImages(rel)
               return (
-              <Link key={rel.recallSn} to={`/recall/${rel.recallSn}`} state={{ items: [rel] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(120px, 35vw, 160px)' }}>
+              <Link key={rel.recallSn} to={`/recall/${rel.recallSn}`} state={{ items: [rel] }} onClick={() => logEvent('related_product_click', { productName: rel.productNm })} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(120px, 35vw, 160px)' }}>
                 <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
                   <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', background: '#f1f5f9' }}>
                     {relImages.length > 0 ? (
