@@ -196,9 +196,63 @@ async function upsertRecall(row: any) {
   if (error) console.error('[Upsert error]', error.message);
 }
 
+const RISK_KEYWORDS: { tag: string; keywords: string[] }[] = [
+  { tag: '화재', keywords: ['화재', '발화', '불', '점화', '과열', '발열', '폭발'] },
+  { tag: '감전', keywords: ['감전', '누전', '누액', '전류', '절연'] },
+  { tag: '질식', keywords: ['질식', '기도', '흡입', '삼킴', '목'] },
+  { tag: '유해물질', keywords: ['유해', '중금속', '납', '카드뮴', '프탈레이트', 'BPA', '환경호르몬', '발암', '독성', '화학'] },
+  { tag: '화상', keywords: ['화상', '열상', '온도'] },
+  { tag: '불량', keywords: ['부상', '절단', '베임', '찔림', '파손', '균열', '불량', '고장', '오작동'] },
+  { tag: '알레르기', keywords: ['알레르기', '아토피', '피부', '발진', '가려움'] },
+  { tag: '질병', keywords: ['질병', '감염', '세균', '곰팡이', '식중독', '살모넬라'] },
+];
+
+function extractRiskTags(shrtcomCn: string, productNm: string): string[] {
+  const text = `${shrtcomCn || ''} ${productNm || ''}`.toLowerCase();
+  return RISK_KEYWORDS.filter(r => r.keywords.some(kw => text.includes(kw.toLowerCase()))).map(r => r.tag);
+}
+
+async function queryDBRelated(recallSn: string) {
+  const sb = getSupabase();
+  if (!sb) return null;
+  try {
+    const { data: source } = await sb.from('recalls').select('*').eq('recall_sn', recallSn).single();
+    if (!source) return null;
+
+    const category = source.category;
+    const sourceRiskTags = extractRiskTags(source.shrtcom_cn, source.product_nm);
+
+    const { data: candidates } = await applyImageFilter(
+      sb.from('recalls').select('*').eq('category', category).neq('recall_sn', recallSn)
+    ).order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(50);
+
+    if (!candidates || candidates.length === 0) return null;
+
+    const scored = candidates.map((c: any) => {
+      const tags = extractRiskTags(c.shrtcom_cn, c.product_nm);
+      const overlap = tags.filter(t => sourceRiskTags.includes(t)).length;
+      return { item: c, tags, score: overlap };
+    });
+
+    scored.sort((a: any, b: any) => {
+      if (b.score !== a.score) return b.score - a.score;
+      return (b.item.recall_reg_dt || '') > (a.item.recall_reg_dt || '') ? 1 : -1;
+    });
+
+    return scored.slice(0, 5).map((s: any) => ({ ...toClient(s.item), riskTags: s.tags }));
+  } catch { return null; }
+}
+
 export default async function handler(req: any, res: any) {
   try {
-    const { q, category, recent } = req.query || {};
+    const { q, category, recent, related } = req.query || {};
+
+    // Related recalls
+    if (related) {
+      const fromDb = await queryDBRelated(related);
+      if (fromDb) return res.json({ items: fromDb, source: 'db' });
+      return res.json({ items: [], source: 'db' });
+    }
 
     // Category browse: DB → Consumer24 fallback
     if (category) {

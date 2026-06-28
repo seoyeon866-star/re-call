@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, Link, useNavigate } from 'react-router-dom'
-import { getRecallImages, handleImgError } from '../api/consumerRecall'
+import { getRecallImages, handleImgError, fetchRelatedRecalls } from '../api/consumerRecall'
 import { buildRecallWithMeta, parseProductName, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 
 interface AltProduct {
@@ -28,6 +28,7 @@ export default function ProductDetail() {
   const data = location.state as { items: any[]; fromQuery?: string } | null
 
   const [altItems, setAltItems] = useState<AltProduct[]>([])
+  const [relatedItems, setRelatedItems] = useState<RecallWithMeta[]>([])
 
   const item: RecallWithMeta | null = data?.items?.[0]
     ? buildRecallWithMeta(data.items[0])
@@ -44,6 +45,9 @@ export default function ProductDetail() {
       .then(data => {
         if (data.items) setAltItems(data.items)
       })
+      .catch(() => {})
+    fetchRelatedRecalls(item.recallSn)
+      .then(items => setRelatedItems(items.map(buildRecallWithMeta)))
       .catch(() => {})
   }, [item?.recallSn])
 
@@ -83,18 +87,11 @@ export default function ProductDetail() {
 
       {/* ── Product info card ── */}
       <div style={{ margin: '-20px 16px 0', background: '#fff', borderRadius: '20px', padding: '24px', position: 'relative', zIndex: 1, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
-        {item.makr && item.makr !== '-' && (
-          <p style={{ margin: '0 0 4px', fontSize: '0.8rem', color: '#94a3b8' }}>{item.makr}</p>
-        )}
-        {(() => { const parsed = parseProductName(item.productNm); return parsed ? (
+        {(() => { const parsed = parseProductName(item.productNm); const brand = parsed?.brand || (item.makr && item.makr !== '-' ? item.makr : ''); return (
           <div style={{ margin: '0 0 12px' }}>
-            {parsed.brand && <p style={{ margin: '0 0 2px', fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.3 }}>{parsed.brand}</p>}
-            <h1 style={{ margin: 0, fontSize: 'clamp(1.2rem, 5vw, 1.4rem)', fontWeight: 700, color: '#1e293b', lineHeight: 1.3, wordBreak: 'break-word' }}>{parsed.product}</h1>
+            {brand && <p style={{ margin: '0 0 2px', fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.3 }}>{brand}</p>}
+            <h1 style={{ margin: 0, fontSize: 'clamp(1.2rem, 5vw, 1.4rem)', fontWeight: 700, color: '#1e293b', lineHeight: 1.3, wordBreak: 'break-word' }}>{parsed?.product || item.productNm}</h1>
           </div>
-        ) : (
-          <h1 style={{ margin: '0 0 12px', fontSize: 'clamp(1.2rem, 5vw, 1.4rem)', fontWeight: 700, color: '#1e293b', lineHeight: 1.3, wordBreak: 'break-word' }}>
-            {item.productNm}
-          </h1>
         )})()}
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
@@ -148,6 +145,51 @@ export default function ProductDetail() {
           </div>
         </div>
       </div>
+
+      {/* ── Related recalls ── */}
+      {relatedItems.length > 0 && (
+        <div style={{ padding: '0 16px 24px' }}>
+          <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 4px' }}>관련 리콜 정보</h2>
+          <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 16px' }}>같은 카테고리의 유사 리콜 제품입니다.</p>
+          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
+            {relatedItems.map((rel) => {
+              const relImages = getRecallImages(rel)
+              return (
+              <Link key={rel.recallSn} to={`/recall/${rel.recallSn}`} state={{ items: [rel] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(120px, 35vw, 160px)' }}>
+                <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
+                  <div style={{ width: '100%', aspectRatio: '1/1', background: '#f1f5f9' }}>
+                    {relImages.length > 0 ? (
+                      <img src={relImages[0]} alt={rel.productNm} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => handleImgError(e, rel.category)} />
+                    ) : (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', height: '100%', color: '#cbd5e1' }}>?</div>
+                    )}
+                  </div>
+                  <div style={{ padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                    <div style={{ margin: '0 0 4px' }}>
+                      {(() => { const parsed = parseProductName(rel.productNm); const brand = parsed?.brand || (rel.makr && rel.makr !== '-' ? rel.makr : ''); return (
+                        <>
+                          {brand && <p style={{ margin: 0, fontSize: '0.6rem', color: '#94a3b8', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{brand}</p>}
+                          <p style={{ margin: 0, fontSize: '0.78rem', color: '#1e293b', fontWeight: 600, wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: brand ? 1 : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{parsed?.product || rel.productNm}</p>
+                        </>
+                      )})()}
+                    </div>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {rel.riskTags?.slice(0, 1).map(tag => (
+                        <span key={tag} style={{ fontSize: '0.65rem', padding: '1px 6px', borderRadius: '6px', background: '#FCEBEA', color: '#E63429', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
+                          {RISK_ICONS[tag] && <img src={RISK_ICONS[tag]} alt={tag} style={{ width: '10px', height: '10px' }} />}
+                          {tag}
+                        </span>
+                      ))}
+                      <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{rel.category}</span>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
       {/* ── Alternative products ── */}
       {altItems.length > 0 && (

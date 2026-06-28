@@ -79,3 +79,10 @@ export async function fetchRecentRecalls(): Promise<RecallItem[]> {
   })
   return (data as any).items || []
 }
+
+export async function fetchRelatedRecalls(recallSn: string): Promise<RecallItem[]> {
+  const { data } = await axios.get('/api/recalls', {
+    params: { related: recallSn },
+  })
+  return (data as any).items || []
+}

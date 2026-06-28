@@ -4,8 +4,7 @@ import { fetchRecentRecalls, getRecallImages, handleImgError } from '../api/cons
 import { buildRecallWithMeta, parseProductName, type RecallWithMeta } from '../lib/classify'
 import { CATEGORIES } from '../config/categories'
 
-const RECENT_SEARCHES_KEY = 'recent_searches'
-const MAX_RECENT = 8
+const RECOMMENDED_KEYWORDS = ['영양제', '장난감', '텀블러', '충전기']
 
 const CATEGORY_ICONS: Record<string, string> = {
   '키즈': '/assets/category/키즈.png',
@@ -18,27 +17,11 @@ const CATEGORY_ICONS: Record<string, string> = {
   '가전·디지털': '/assets/category/가전·디지털.png',
 }
 
-function getRecentSearches(): string[] {
-  try {
-    return JSON.parse(localStorage.getItem(RECENT_SEARCHES_KEY) || '[]')
-  } catch {
-    return []
-  }
-}
-
-function addRecentSearch(term: string) {
-  const list = getRecentSearches().filter(s => s !== term)
-  list.unshift(term)
-  if (list.length > MAX_RECENT) list.length = MAX_RECENT
-  localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(list))
-}
-
 export default function Home() {
   const [query, setQuery] = useState('')
   const [recentRecalls, setRecentRecalls] = useState<RecallWithMeta[]>([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
-  const recentSearches = getRecentSearches()
 
   useEffect(() => {
     fetchRecentRecalls()
@@ -51,7 +34,6 @@ export default function Home() {
     e.preventDefault()
     const trimmed = query.trim()
     if (!trimmed) return
-    addRecentSearch(trimmed)
     navigate(`/search?query=${encodeURIComponent(trimmed)}`)
   }
 
@@ -90,19 +72,17 @@ export default function Home() {
           </div>
         </form>
 
-        {recentSearches.length > 0 && (
-          <section style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 10px' }}>최근 검색어</h3>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-              {recentSearches.map(term => (
-                <button key={term} onClick={() => navigate(`/search?query=${encodeURIComponent(term)}`)} style={{
-                  padding: '6px 14px', borderRadius: '20px', border: '1px solid #cbd5e1',
-                  background: '#fff', fontSize: '0.8rem', color: '#94a3b8', cursor: 'pointer',
-                }}>{term}</button>
-              ))}
-            </div>
-          </section>
-        )}
+        <section style={{ marginBottom: '24px' }}>
+          <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 10px' }}>추천 검색어</h3>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+            {RECOMMENDED_KEYWORDS.map(term => (
+              <button key={term} onClick={() => navigate(`/search?query=${encodeURIComponent(term)}`)} style={{
+                padding: '6px 14px', borderRadius: '20px', border: '1px solid #54B8DB',
+                background: '#EBF7FD', fontSize: '0.8rem', color: '#54B8DB', cursor: 'pointer', fontWeight: 500,
+              }}>{term}</button>
+            ))}
+          </div>
+        </section>
 
         <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 12px' }}>카테고리</h3>
         <section style={{ marginBottom: '28px', background: '#fff', borderRadius: '16px', padding: '24px' }}>
@@ -143,14 +123,14 @@ export default function Home() {
                     ) : '?'}
                   </div>
                   <div style={{ padding: '10px', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    {(() => { const parsed = parseProductName(item.productNm); return parsed ? (
-                      <div style={{ margin: '0 0 4px' }}>
-                        {parsed.brand && <p style={{ margin: 0, fontSize: '0.6rem', color: '#94a3b8', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{parsed.brand}</p>}
-                        <p style={{ margin: 0, fontSize: '0.78rem', color: '#1e293b', fontWeight: 600, wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: parsed.brand ? 1 : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{parsed.product}</p>
-                      </div>
-                    ) : (
-                      <p style={{ margin: '0 0 4px', fontSize: '0.78rem', color: '#1e293b', fontWeight: 600, wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{item.productNm}</p>
-                    )})()}
+                    <div style={{ margin: '0 0 4px' }}>
+                      {(() => { const parsed = parseProductName(item.productNm); const brand = parsed?.brand || (item.makr && item.makr !== '-' ? item.makr : ''); return (
+                        <>
+                          {brand && <p style={{ margin: 0, fontSize: '0.6rem', color: '#94a3b8', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{brand}</p>}
+                          <p style={{ margin: 0, fontSize: '0.78rem', color: '#1e293b', fontWeight: 600, wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: brand ? 1 : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', lineHeight: 1.3 }}>{parsed?.product || item.productNm}</p>
+                        </>
+                      )})()}
+                    </div>
                     <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
                       <span style={{ fontSize: '0.68rem', padding: '1px 6px', borderRadius: '6px', background: '#EBF7FD', color: '#54B8DB' }}>{item.category}</span>
                       {item.recallRegDt && <span style={{ fontSize: '0.65rem', color: '#94a3b8' }}>{item.recallRegDt.slice(0, 10)}</span>}
