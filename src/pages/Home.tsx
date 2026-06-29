@@ -96,8 +96,8 @@ export default function Home() {
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                 padding: '0', border: 'none', background: 'transparent', cursor: 'pointer',
               }}>
-                <img src={CATEGORY_ICONS[cat]} alt={cat} style={{ width: 'clamp(28px, 6vw, 36px)', height: 'clamp(28px, 6vw, 36px)', objectFit: 'contain' }} />
-                <span style={{ fontSize: 'clamp(0.65rem, 2.2vw, 0.75rem)', color: '#475569', lineHeight: 1.2, wordBreak: 'keep-all', textAlign: 'center' }}>{cat}</span>
+                <img src={CATEGORY_ICONS[cat]} alt={cat} style={{ width: 'clamp(36px, 8vw, 48px)', height: 'clamp(36px, 8vw, 48px)', objectFit: 'contain' }} />
+                <span style={{ fontSize: 'clamp(0.75rem, 2.8vw, 0.9rem)', color: '#475569', lineHeight: 1.2, wordBreak: 'keep-all', textAlign: 'center' }}>{cat}</span>
               </button>
             ))}
           </div>
