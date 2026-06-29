@@ -180,9 +180,11 @@ async function queryDBSearch(q: string) {
   const sb = getSupabase();
   if (!sb) return null;
   try {
-    const query = applyImageFilter(
-      sb.from('recalls').select('*').or(`product_nm.ilike.%${q}%,makr.ilike.%${q}%,bsnm_nm.ilike.%${q}%`)
-    );
+    const words = q.split(/\s+/).filter(Boolean);
+    let query = applyImageFilter(sb.from('recalls').select('*'));
+    for (const w of words) {
+      query = query.or(`product_nm.ilike.%${w}%,makr.ilike.%${w}%,bsnm_nm.ilike.%${w}%`);
+    }
     const { data, error } = await query.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100);
     if (error) throw error;
     return data && data.length > 0 ? data.map(toClient) : null;
