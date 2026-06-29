@@ -28,7 +28,7 @@ export function logEvent(event_name: string, event_data: Record<string, string |
     }
   } catch {}
 
-  // Check Task 1 completion: home_view → detail_view (스탠리 1913 스위치백 텀블러)
+  // Check Task 1 completion: home_view → detail_view (라부부 COCA-COLA 시리즈 - 랜덤박스 장난감)
   if (event_name === 'detail_view' && event_data.productName === '스탠리 1913 스위치백 텀블러') {
     checkTask1Completion()
   }
@@ -38,7 +38,7 @@ function checkTask1Completion() {
   try {
     const events = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') as UtEvent[]
     const homeEvent = events.find(e => e.event_name === 'home_view')
-    const detailEvent = events.find(e => e.event_name === 'detail_view' && e.event_data.productName === '스탠리 1913 스위치백 텀블러')
+    const detailEvent = events.find(e => e.event_name === 'detail_view' && e.event_data.productName === '라부부 COCA-COLA 시리즈 - 랜덤박스 장난감')
     if (!homeEvent || !detailEvent) return
     const start = new Date(homeEvent.timestamp).getTime()
     const end = new Date(detailEvent.timestamp).getTime()
