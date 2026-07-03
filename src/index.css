@@ -8,11 +8,13 @@ body {
   -webkit-text-size-adjust: 100%;
   overflow-x: hidden;
   font-size: 15px;
+  background: #F4FBFD;
 }
 
 #root {
   min-height: 100vh;
   overflow-x: hidden;
+  background: #F4FBFD;
 }
 
 img {

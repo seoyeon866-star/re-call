@@ -65,12 +65,12 @@ export default function ProductDetail() {
   const images = getRecallImages(item)
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto' }}>
       {/* ── Header ── */}
       <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #e2e8f0' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
-          <span style={{ fontSize: '1.1rem' }}>&larr;</span> 뒤로
+          <img src="/assets/icon_arrow.png" alt="back" style={{ width: '20px', height: '20px' }} /> 뒤로
         </button>
         <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500 }}>
           검색

@@ -46,7 +46,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box' }}>
+    <div style={{ minHeight: '100vh', boxSizing: 'border-box' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '32px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <h1 style={{ fontSize: 'clamp(1.8rem, 7vw, 2.4rem)', margin: 0, fontWeight: 700, letterSpacing: '-0.5px' }}>Re:call</h1>
@@ -57,17 +57,27 @@ export default function Home() {
 
         <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
           <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
             <input
               type="text"
               placeholder="리콜 상품명을 입력하세요"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               style={{
-                flex: 1, minWidth: 0, padding: '12px 16px', fontSize: '0.95rem',
+                width: '100%', padding: '12px 16px', fontSize: '0.95rem',
                 border: '1px solid #e2e8f0', borderRadius: '12px', outline: 'none',
-                boxSizing: 'border-box', background: '#fff',
+                boxSizing: 'border-box', background: '#fff', paddingRight: query ? '40px' : '16px',
               }}
             />
+            {query && (
+              <button type="button" onClick={() => setQuery('')} style={{
+                position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+              }}>
+                <img src="/assets/icon_deleteKeyword.png" alt="clear" style={{ width: '20px', height: '20px' }} />
+              </button>
+            )}
+          </div>
             <button type="submit" style={{
               padding: '12px 20px', fontSize: '0.95rem', border: 'none',
               borderRadius: '12px', background: '#54B8DB', color: '#fff',

@@ -59,9 +59,12 @@ export default function SearchResult() {
   }, [rawItems, sortBy, filterCountry, filterCategory, filterRiskTag])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#F4FBFD', maxWidth: '480px', margin: '0 auto', padding: '24px 16px 40px', boxSizing: 'border-box', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', boxSizing: 'border-box' }}>
+    <div style={{ maxWidth: '480px', margin: '0 auto', padding: '24px 16px 40px', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
-        <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '1.2rem' }}>&larr;</Link>
+        <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '1.2rem' }}>
+          <img src="/assets/icon_arrow.png" alt="back" style={{ width: '20px', height: '20px' }} />
+        </Link>
         <h2 style={{ margin: 0, fontSize: 'clamp(1rem, 4vw, 1.2rem)', fontWeight: 600, color: '#1e293b', wordBreak: 'break-word' }}>
           {isCategoryMode ? category : `"${query}" 검색 결과`}
         </h2>
@@ -153,6 +156,7 @@ export default function SearchResult() {
           </div>
         </>
       )}
+    </div>
     </div>
   )
 }
