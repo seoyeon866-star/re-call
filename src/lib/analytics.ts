@@ -6,10 +6,11 @@ interface UtEvent {
   timestamp: string
 }
 
-export function logEvent(event_name: string, event_data: Record<string, string | number> = {}) {
+export function logEvent(event_name: string, event_data: Record<string, string | number> = {}, extra?: Record<string, string | number>) {
   const payload = {
     event: event_name,
     ...event_data,
+    ...extra,
   }
   try {
     // localStorage backup
@@ -48,7 +49,7 @@ function checkTask1Completion() {
     // Push to dataLayer
     try {
       if (typeof window !== 'undefined' && (window as any).dataLayer) {
-        (window as any).dataLayer.push({ event: 'task_complete', task: 1, completionTimeSec: parseFloat(diffSec) })
+        (window as any).dataLayer.push({ event: 'task_complete', task: 1, completionTimeSec: parseFloat(diffSec), utVersion: '2' })
       }
     } catch {}
   } catch {}

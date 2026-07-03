@@ -5,8 +5,6 @@ import { CATEGORIES } from '../config/categories'
 import { buildRecallWithMeta, parseProductName, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 import { logEvent } from '../lib/analytics'
 
-const RECALL_SE_OPTIONS = ['리콜', '판매중단', '무상수리', '교환', '환급'] as const
-
 export default function SearchResult() {
   const location = useLocation()
   const params = new URLSearchParams(location.search)
@@ -18,7 +16,6 @@ export default function SearchResult() {
   const [error, setError] = useState('')
 
   const [sortBy, setSortBy] = useState<'relevance' | 'latest'>('relevance')
-  const [filterRecallSe, setFilterRecallSe] = useState('')
   const [filterCountry, setFilterCountry] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [filterRiskTag, setFilterRiskTag] = useState('')
@@ -29,7 +26,6 @@ export default function SearchResult() {
     if (!query && !category) { setRawItems([]); return }
     setLoading(true)
     setError('')
-    setFilterRecallSe('')
     setFilterCountry('')
     setFilterCategory('')
     setFilterRiskTag('')
@@ -55,13 +51,12 @@ export default function SearchResult() {
 
   const items = useMemo(() => {
     let result = [...rawItems]
-    if (filterRecallSe) result = result.filter(i => i.recallSe === filterRecallSe)
     if (filterCountry) result = result.filter(i => i.country === filterCountry)
     if (filterCategory) result = result.filter(i => i.category === filterCategory)
     if (filterRiskTag) result = result.filter(i => i.riskTags.includes(filterRiskTag))
     if (sortBy === 'latest') result.sort((a, b) => ((b.recallRegDt || '') > (a.recallRegDt || '') ? 1 : -1))
     return result
-  }, [rawItems, sortBy, filterRecallSe, filterCountry, filterCategory, filterRiskTag])
+  }, [rawItems, sortBy, filterCountry, filterCategory, filterRiskTag])
 
   return (
     <div style={{ minHeight: '100vh', background: '#F4FBFD', maxWidth: '480px', margin: '0 auto', padding: '24px 16px 40px', boxSizing: 'border-box', overflowX: 'hidden' }}>
@@ -98,28 +93,24 @@ export default function SearchResult() {
             <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center', borderRadius: '10px', padding: '4px 8px' }}>
               <span style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap' }}>총 {items.length}건</span>
             </div>
-            <select value={sortBy} onChange={e => { const v = e.target.value; setSortBy(v as 'relevance' | 'latest'); logEvent('filter_apply', { sort: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+            <select value={sortBy} onChange={e => { const v = e.target.value; setSortBy(v as 'relevance' | 'latest'); logEvent('filter_apply', { sort: v }); logEvent('filter_click', { filterType: 'sort', filterValue: v }, { utVersion: '2' }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
               <option value="relevance">관련도순</option>
               <option value="latest">최신순</option>
             </select>
-            <select value={filterRecallSe} onChange={e => { const v = e.target.value; setFilterRecallSe(v); if (v) logEvent('filter_apply', { recallSe: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
-              <option value="">유형</option>
-              {RECALL_SE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-            </select>
             {!isCategoryMode && (
-              <select value={filterCategory} onChange={e => { const v = e.target.value; setFilterCategory(v); if (v) logEvent('filter_apply', { category: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+              <select value={filterCategory} onChange={e => { const v = e.target.value; setFilterCategory(v); logEvent('filter_apply', v ? { category: v } : {}); logEvent('filter_click', { filterType: 'category', filterValue: v }, { utVersion: '2' }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
                 <option value="">카테고리</option>
                 {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             )}
             {filters.countries.length > 0 && (
-              <select value={filterCountry} onChange={e => { const v = e.target.value; setFilterCountry(v); if (v) logEvent('filter_apply', { country: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+              <select value={filterCountry} onChange={e => { const v = e.target.value; setFilterCountry(v); logEvent('filter_apply', v ? { country: v } : {}); logEvent('filter_click', { filterType: 'country', filterValue: v }, { utVersion: '2' }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
                 <option value="">국가</option>
                 {filters.countries.map(c => <option key={c} value={c}>{c}</option>)}
               </select>
             )}
             {filters.riskTags.length > 0 && (
-              <select value={filterRiskTag} onChange={e => { const v = e.target.value; setFilterRiskTag(v); if (v) logEvent('filter_apply', { riskTag: v }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
+              <select value={filterRiskTag} onChange={e => { const v = e.target.value; setFilterRiskTag(v); logEvent('filter_apply', v ? { riskTag: v } : {}); logEvent('filter_click', { filterType: 'riskTag', filterValue: v }, { utVersion: '2' }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
                 <option value="">위험</option>
                 {filters.riskTags.map(t => <option key={t} value={t}>{t}</option>)}
               </select>

@@ -181,13 +181,23 @@ async function queryDBSearch(q: string) {
   if (!sb) return null;
   try {
     const words = q.split(/\s+/).filter(Boolean);
+    // Try AND first (each word must match)
     let query = applyImageFilter(sb.from('recalls').select('*'));
     for (const w of words) {
       query = query.or(`product_nm.ilike.%${w}%,makr.ilike.%${w}%,bsnm_nm.ilike.%${w}%`);
     }
-    const { data, error } = await query.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100);
-    if (error) throw error;
-    return data && data.length > 0 ? data.map(toClient) : null;
+    let { data, error } = await query.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100);
+    if (!error && data && data.length > 0) return data.map(toClient);
+
+    // Fallback to OR (any word matches)
+    if (words.length > 1) {
+      const orConditions = words.map(w => `product_nm.ilike.%${w}%,makr.ilike.%${w}%,bsnm_nm.ilike.%${w}%`).join(',');
+      query = applyImageFilter(sb.from('recalls').select('*')).or(orConditions);
+      const result = await query.order('recall_reg_dt', { ascending: false, nullsFirst: false }).limit(100);
+      if (!result.error && result.data && result.data.length > 0) return result.data.map(toClient);
+    }
+
+    return null;
   } catch { return null; }
 }
 
