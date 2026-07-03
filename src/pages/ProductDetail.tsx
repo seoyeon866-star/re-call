@@ -35,14 +35,14 @@ export default function ProductDetail() {
 
   const navigate = useNavigate()
 
-  const item: RecallWithMeta | null = data?.items?.[0]
-    ? buildRecallWithMeta(data.items[0])
-    : fetchedItem
+  const item: RecallWithMeta | null = fetchedItem
     ? buildRecallWithMeta(fetchedItem)
+    : data?.items?.[0]
+    ? buildRecallWithMeta(data.items[0])
     : null
 
   useEffect(() => {
-    if (data?.items?.[0]) return
+    if (data?.items?.[0]?.shrtcomCn) return
     if (id) {
       fetchRecallById(id).then(item => {
         if (item) setFetchedItem(item)

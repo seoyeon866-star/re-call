@@ -139,9 +139,9 @@ export default function Home() {
             {recentRecalls.filter(item => getRecallImages(item).length > 0).map((item) => {
               const images = getRecallImages(item)
               return (
-              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(130px, 38vw, 170px)' }}>
+              <Link key={item.recallSn} to={`/recall/${item.recallSn}`} state={{ items: [item] }} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(130px, 38vw, 170px)' }} className="search-item">
                 <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', background: '#f1f5f9', flexShrink: 0 }}>
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', background: '#f1f5f9', flexShrink: 0 }} className="search-item-img">
                     {images.length > 0 ? (
                       <img src={images[0]} alt={item.productNm} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} onError={(e) => handleImgError(e, item.category)} />
                     ) : (
@@ -175,9 +175,9 @@ export default function Home() {
             {POPULAR_PRODUCTS.map((item, idx) => {
               const images = item.recallImgUrls ? item.recallImgUrls.split(',') : [];
               return (
-              <Link key={idx} to={item.link || '#'} state={item.link ? { items: [item] } : undefined} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(130px, 38vw, 170px)' }}>
+              <Link key={idx} to={item.link || '#'} state={item.link ? { items: [item] } : undefined} style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(130px, 38vw, 170px)' }} className="search-item">
                 <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)', height: '100%', display: 'flex', flexDirection: 'column' }}>
-                  <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', background: '#f1f5f9', flexShrink: 0 }}>
+                  <div style={{ position: 'relative', width: '100%', paddingBottom: '100%', background: '#f1f5f9', flexShrink: 0 }} className="search-item-img">
                     {images.length > 0 ? (
                       <img src={images[0]} alt={item.productNm} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: 'cover' }} />
                     ) : (
