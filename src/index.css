@@ -54,6 +54,25 @@ img {
   background: #F1F1F1;
 }
 
+.keyword-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1px solid #54B8DB;
+  background: #fff;
+  font-size: 0.8rem;
+  color: #54B8DB;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+.keyword-chip:hover {
+  background: #EBF7FD;
+}
+
+.search-input::placeholder {
+  color: #888888;
+}
+
 .cat-grid {
   display: flex;
   justify-content: center;

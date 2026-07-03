@@ -72,6 +72,7 @@ export default function Home() {
               placeholder="상품명 또는 링크로 검색해보세요."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
+              className="search-input"
               style={{
                 width: '100%', padding: 'clamp(10px, 3vw, 14px) clamp(36px, 10vw, 48px) clamp(10px, 3vw, 14px) clamp(40px, 11vw, 52px)',
                 fontSize: 'clamp(0.85rem, 3.5vw, 1rem)',
@@ -98,10 +99,7 @@ export default function Home() {
           <h3 style={{ fontSize: 'clamp(0.85rem, 2.5vw, 18px)', fontWeight: 700, color: '#1B2325', margin: '0 0 10px' }}>추천 검색어</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {RECOMMENDED_KEYWORDS.map(term => (
-              <button key={term} onClick={() => { logEvent('recommend_keyword_click', { keyword: term }); navigate(`/search?query=${encodeURIComponent(term)}`) }} style={{
-                padding: '6px 14px', borderRadius: '20px', border: '1px solid #54B8DB',
-                background: '#EBF7FD', fontSize: '0.8rem', color: '#54B8DB', cursor: 'pointer', fontWeight: 500,
-              }}>{term}</button>
+              <button key={term} onClick={() => { logEvent('recommend_keyword_click', { keyword: term }); navigate(`/search?query=${encodeURIComponent(term)}`) }} className="keyword-chip">{term}</button>
             ))}
           </div>
         </section>
