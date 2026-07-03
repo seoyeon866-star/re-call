@@ -29,3 +29,13 @@ img {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+.search-item:hover .search-item-img img {
+  transform: scale(1.08);
+}
+.search-item-img {
+  overflow: hidden;
+}
+.search-item-img img {
+  transition: transform 0.2s ease;
+}
