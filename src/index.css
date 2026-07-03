@@ -41,8 +41,8 @@ img {
 }
 
 .cat-icon-bg {
-  width: 50px;
-  height: 50px;
+  width: clamp(44px, 10vw, 50px);
+  height: clamp(44px, 10vw, 50px);
   display: flex;
   align-items: center;
   justify-content: center;

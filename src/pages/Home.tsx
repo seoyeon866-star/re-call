@@ -106,14 +106,14 @@ export default function Home() {
         </section>
 
         <section style={{ marginBottom: '28px', background: '#fff', borderRadius: '16px', padding: '24px' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px 8px' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '16px 8px' }}>
             {CATEGORIES.map(cat => (
               <button key={cat} onClick={() => handleCategoryClick(cat)} className="category-btn" style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
                 padding: '0', border: 'none', background: 'transparent', cursor: 'pointer',
               }}>
                 <div className="cat-icon-bg">
-                  <img src={CATEGORY_ICONS[cat]} alt={cat} style={{ width: 'clamp(36px, 8vw, 48px)', height: 'clamp(36px, 8vw, 48px)', objectFit: 'contain' }} />
+                  <img src={CATEGORY_ICONS[cat]} alt={cat} style={{ width: 'clamp(34px, 7vw, 40px)', height: 'clamp(34px, 7vw, 40px)', objectFit: 'contain' }} />
                 </div>
                 <span style={{ fontSize: 'clamp(0.75rem, 2.8vw, 0.9rem)', color: '#475569', lineHeight: 1.2, wordBreak: 'keep-all', textAlign: 'center' }}>{cat}</span>
               </button>
