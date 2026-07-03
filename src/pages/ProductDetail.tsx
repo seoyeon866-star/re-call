@@ -79,9 +79,9 @@ export default function ProductDetail() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box', overflowX: 'hidden' }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 16px' }}>
       {/* ── Header ── */}
-      <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #e2e8f0' }}>
+      <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid #e2e8f0', margin: '0 -16px' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
           <img src="/assets/icon_arrow.png" alt="back" style={{ width: '24px', height: '24px' }} />
         </button>
@@ -102,7 +102,7 @@ export default function ProductDetail() {
       </div>
 
       {/* ── Product info card ── */}
-      <div style={{ margin: '-20px 16px 0', background: '#fff', borderRadius: '20px', padding: '24px', position: 'relative', zIndex: 1, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
+      <div style={{ margin: '-20px 0 0', background: '#fff', borderRadius: '20px', padding: '24px', position: 'relative', zIndex: 1, boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}>
         {(() => { const parsed = parseProductName(item.productNm); const brand = parsed?.brand || (item.makr && item.makr !== '-' ? item.makr : ''); return (
           <div style={{ margin: '0 0 12px' }}>
             {brand && <p style={{ margin: '0 0 2px', fontSize: '0.85rem', color: '#94a3b8', lineHeight: 1.3 }}>{brand}</p>}
@@ -164,7 +164,7 @@ export default function ProductDetail() {
 
       {/* ── Related recalls ── */}
       {relatedItems.length > 0 && (
-        <div style={{ padding: '24px 16px 24px' }}>
+        <div style={{ padding: '24px 0' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 4px' }}>관련 리콜 정보</h2>
           <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 16px' }}>같은 카테고리의 유사 리콜 제품입니다.</p>
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
@@ -209,7 +209,7 @@ export default function ProductDetail() {
 
       {/* ── Alternative products ── */}
       {altItems.length > 0 && (
-        <div style={{ padding: '24px 16px 32px' }}>
+        <div style={{ padding: '24px 0 32px' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 4px' }}>대체상품 추천</h2>
           <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 16px' }}>리콜 이력이 없는 유사 상품입니다.</p>
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
@@ -237,7 +237,7 @@ export default function ProductDetail() {
 
       {/* ── More button ── */}
       {item.category && item.category !== '기타' && (
-        <div style={{ padding: '0 16px 32px', textAlign: 'center' }}>
+        <div style={{ padding: '0 0 32px', textAlign: 'center' }}>
           <Link to={`/search?category=${encodeURIComponent(item.category)}`} style={{ display: 'inline-block', padding: '12px 32px', borderRadius: '12px', background: '#54B8DB', color: '#fff', fontSize: '0.9rem', fontWeight: 600, textDecoration: 'none' }}>
             {item.category} 전체보기
           </Link>

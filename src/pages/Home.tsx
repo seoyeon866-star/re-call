@@ -104,7 +104,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section style={{ marginBottom: '28px', background: '#fff', borderRadius: '16px', padding: '24px' }}>
+        <section style={{ marginBottom: '24px', marginTop: '24px', background: '#fff', borderRadius: '16px', padding: '24px' }}>
           <div className="cat-grid">
             {CATEGORIES.map(cat => (
               <button key={cat} onClick={() => handleCategoryClick(cat)} className="category-btn" style={{
