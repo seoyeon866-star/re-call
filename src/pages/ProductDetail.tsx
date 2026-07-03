@@ -82,11 +82,11 @@ export default function ProductDetail() {
       <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
       {/* ── Header ── */}
       <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #e2e8f0' }}>
-        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
-          <img src="/assets/icon_arrow.png" alt="back" style={{ width: '20px', height: '20px' }} /> 뒤로
+        <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, display: 'flex', alignItems: 'center' }}>
+          <img src="/assets/icon_arrow.png" alt="back" style={{ width: '24px', height: '24px' }} />
         </button>
-        <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500 }}>
-          검색
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center' }}>
+          <img src="/assets/icon_search.png" alt="search" style={{ width: '24px', height: '24px' }} />
         </Link>
       </div>
 
