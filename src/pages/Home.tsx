@@ -95,7 +95,7 @@ export default function Home() {
         </form>
 
         <section style={{ marginBottom: '24px' }}>
-          <h3 style={{ fontSize: 'clamp(0.85rem, 2.5vw, 18px)', fontWeight: 600, color: '#64748b', margin: '0 0 10px' }}>추천 검색어</h3>
+          <h3 style={{ fontSize: 'clamp(0.85rem, 2.5vw, 18px)', fontWeight: 700, color: '#1B2325', margin: '0 0 10px' }}>추천 검색어</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
             {RECOMMENDED_KEYWORDS.map(term => (
               <button key={term} onClick={() => { logEvent('recommend_keyword_click', { keyword: term }); navigate(`/search?query=${encodeURIComponent(term)}`) }} style={{
@@ -107,7 +107,7 @@ export default function Home() {
         </section>
 
         <section style={{ marginBottom: '28px', background: '#fff', borderRadius: '16px', padding: '24px' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '30px' }}>
+          <div className="cat-grid">
             {CATEGORIES.map(cat => (
               <button key={cat} onClick={() => handleCategoryClick(cat)} className="category-btn" style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px',
@@ -117,15 +117,14 @@ export default function Home() {
                 <div className="cat-icon-bg">
                   <img src={CATEGORY_ICONS[cat]} alt={cat} style={{ width: 'clamp(30px, 6vw, 40px)', height: 'clamp(30px, 6vw, 40px)', objectFit: 'contain' }} />
                 </div>
-                <span style={{ fontSize: 'clamp(0.75rem, 2.8vw, 0.9rem)', color: '#475569', lineHeight: 1.2, wordBreak: 'keep-all', textAlign: 'center' }}>{cat}</span>
+                <span style={{ fontSize: 'clamp(0.75rem, 2.8vw, 0.9rem)', color: '#475569', lineHeight: 1.2, wordBreak: 'keep-all', textAlign: 'center', whiteSpace: 'nowrap' }}>{cat}</span>
               </button>
             ))}
           </div>
         </section>
-        </div>
 
         <section>
-          <h3 style={{ fontSize: 'clamp(0.85rem, 2.5vw, 18px)', fontWeight: 600, color: '#64748b', margin: '0 0 12px' }}>최근 등록된 리콜</h3>
+          <h3 style={{ fontSize: 'clamp(0.85rem, 2.5vw, 18px)', fontWeight: 700, color: '#1B2325', margin: '0 0 12px' }}>최근 등록된 리콜</h3>
           {loading && (
             <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px' }} className="hide-scrollbar">
               {[1,2,3,4,5].map(i => (
@@ -171,7 +170,7 @@ export default function Home() {
         </section>
 
         <section style={{ marginTop: '32px' }}>
-          <h3 style={{ fontSize: 'clamp(0.85rem, 2.5vw, 18px)', fontWeight: 600, color: '#64748b', margin: '0 0 12px' }}>많이 조회한 리콜</h3>
+          <h3 style={{ fontSize: 'clamp(0.85rem, 2.5vw, 18px)', fontWeight: 700, color: '#1B2325', margin: '0 0 12px' }}>많이 조회한 리콜</h3>
           <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
             {POPULAR_PRODUCTS.map((item, idx) => {
               const images = item.recallImgUrls ? item.recallImgUrls.split(',') : [];
@@ -200,6 +199,7 @@ export default function Home() {
             })}
           </div>
         </section>
+        </div>
       </div>
     </div>
   )

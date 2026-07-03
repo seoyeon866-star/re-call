@@ -53,3 +53,16 @@ img {
 .category-btn:hover .cat-icon-bg {
   background: #F1F1F1;
 }
+
+.cat-grid {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+@media (max-width: 768px) {
+  .cat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px 8px;
+  }
+}
