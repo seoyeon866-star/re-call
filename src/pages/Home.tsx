@@ -75,7 +75,7 @@ export default function Home() {
               className="search-input"
               style={{
                 width: '100%', padding: 'clamp(10px, 3vw, 14px) clamp(36px, 10vw, 48px) clamp(10px, 3vw, 14px) clamp(40px, 11vw, 52px)',
-                fontSize: 'clamp(0.85rem, 3.5vw, 1rem)',
+                fontSize: 'clamp(1rem, 3.5vw, 1rem)',
                 border: '2px solid #54B8DB', borderRadius: '999px', outline: 'none',
                 boxSizing: 'border-box', background: '#fff',
               }}
