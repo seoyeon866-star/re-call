@@ -74,18 +74,18 @@ export default function Home() {
               onChange={(e) => setQuery(e.target.value)}
               className="search-input"
               style={{
-                width: '100%', padding: 'clamp(10px, 3vw, 14px) clamp(36px, 10vw, 48px) clamp(10px, 3vw, 14px) clamp(40px, 11vw, 52px)',
+                width: '100%', padding: '12px 48px',
                 fontSize: '16px',
                 border: '2px solid #54B8DB', borderRadius: '999px', outline: 'none',
                 boxSizing: 'border-box', background: '#fff', touchAction: 'manipulation',
               }}
             />
-            <div style={{ position: 'absolute', left: 'clamp(10px, 3vw, 14px)', top: 0, bottom: 0, display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
+            <div style={{ position: 'absolute', left: '16px', top: 0, bottom: 0, display: 'flex', alignItems: 'center', pointerEvents: 'none' }}>
               <img src="/assets/icon_search.png" alt="search" style={{ width: 'clamp(18px, 5vw, 24px)', height: 'clamp(18px, 5vw, 24px)' }} />
             </div>
             {query && (
               <button type="button" onClick={() => setQuery('')} style={{
-                position: 'absolute', right: '8px', top: 0, bottom: 0,
+                position: 'absolute', right: '16px', top: 0, bottom: 0,
                 background: 'none', border: 'none', cursor: 'pointer', padding: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
