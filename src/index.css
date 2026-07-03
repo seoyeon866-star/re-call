@@ -73,6 +73,10 @@ img {
   color: #888888;
 }
 
+.filter-chip:hover {
+  background-color: #F5F5F5;
+}
+
 .cat-grid {
   display: flex;
   justify-content: center;

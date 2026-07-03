@@ -5,6 +5,64 @@ import { CATEGORIES } from '../config/categories'
 import { buildRecallWithMeta, parseProductName, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 import { logEvent } from '../lib/analytics'
 
+interface FilterOption { value: string; label: string }
+
+function FilterChip({ label, value, options, onChange, displayMap }: {
+  label: string
+  value: string
+  options: FilterOption[]
+  onChange: (v: string) => void
+  displayMap?: Record<string, string>
+}) {
+  const [open, setOpen] = useState(false)
+  const selected = value ? (displayMap?.[value] || options.find(o => o.value === value)?.label || value) : null
+
+  return (
+    <div style={{ position: 'relative', flexShrink: 0 }}>
+      <button
+        onClick={() => setOpen(!open)}
+        onBlur={() => setTimeout(() => setOpen(false), 150)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: '6px',
+          height: '38px', padding: '0 16px',
+          borderRadius: '999px', border: selected ? 'none' : '1px solid #D9D9D9',
+          background: selected ? '#42B7F3' : '#fff',
+          color: selected ? '#fff' : '#2B2B2B',
+          fontSize: '14px', cursor: 'pointer', fontWeight: 500,
+          transition: 'background-color 0.2s ease',
+          whiteSpace: 'nowrap',
+        }}
+        className="filter-chip"
+      >
+        {selected || label}
+        <span style={{ fontSize: '12px', lineHeight: 1, color: selected ? '#fff' : '#888' }}>⌄</span>
+      </button>
+      {open && (
+        <div style={{
+          position: 'absolute', top: '44px', left: 0, zIndex: 20,
+          background: '#fff', borderRadius: '12px', boxShadow: '0 4px 16px rgba(0,0,0,0.1)',
+          padding: '4px', minWidth: '140px',
+        }}>
+          {options.map(opt => (
+            <button
+              key={opt.value}
+              onMouseDown={() => { onChange(opt.value === value ? '' : opt.value); setOpen(false) }}
+              style={{
+                display: 'block', width: '100%', padding: '10px 14px', border: 'none',
+                background: value === opt.value ? '#EBF7FD' : 'transparent',
+                color: value === opt.value ? '#42B7F3' : '#2B2B2B',
+                fontSize: '14px', cursor: 'pointer', borderRadius: '8px', textAlign: 'left',
+              }}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function SearchResult() {
   const location = useLocation()
   const params = new URLSearchParams(location.search)
@@ -96,27 +154,39 @@ export default function SearchResult() {
             <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center', borderRadius: '10px', padding: '4px 8px' }}>
               <span style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap' }}>총 {items.length}건</span>
             </div>
-            <select value={sortBy} onChange={e => { const v = e.target.value; setSortBy(v as 'relevance' | 'latest'); logEvent('filter_apply', { sort: v }); logEvent('filter_click', { filterType: 'sort', filterValue: v }, { utVersion: '2' }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
-              <option value="relevance">관련도순</option>
-              <option value="latest">최신순</option>
-            </select>
+            <FilterChip
+              label="관련도순"
+              value={sortBy}
+              options={[
+                { value: 'relevance', label: '관련도순' },
+                { value: 'latest', label: '최신순' },
+              ]}
+              onChange={(v) => { setSortBy(v as 'relevance' | 'latest'); logEvent('filter_apply', { sort: v }); logEvent('filter_click', { filterType: 'sort', filterValue: v }, { utVersion: '2' }); }}
+              displayMap={{ relevance: '관련도순', latest: '최신순' }}
+            />
             {!isCategoryMode && (
-              <select value={filterCategory} onChange={e => { const v = e.target.value; setFilterCategory(v); logEvent('filter_apply', v ? { category: v } : {}); logEvent('filter_click', { filterType: 'category', filterValue: v }, { utVersion: '2' }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
-                <option value="">카테고리</option>
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <FilterChip
+                label="카테고리"
+                value={filterCategory}
+                options={CATEGORIES.map(c => ({ value: c, label: c }))}
+                onChange={(v) => { setFilterCategory(v); logEvent('filter_apply', v ? { category: v } : {}); logEvent('filter_click', { filterType: 'category', filterValue: v }, { utVersion: '2' }); }}
+              />
             )}
             {filters.countries.length > 0 && (
-              <select value={filterCountry} onChange={e => { const v = e.target.value; setFilterCountry(v); logEvent('filter_apply', v ? { country: v } : {}); logEvent('filter_click', { filterType: 'country', filterValue: v }, { utVersion: '2' }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
-                <option value="">국가</option>
-                {filters.countries.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <FilterChip
+                label="국가"
+                value={filterCountry}
+                options={filters.countries.map(c => ({ value: c, label: c }))}
+                onChange={(v) => { setFilterCountry(v); logEvent('filter_apply', v ? { country: v } : {}); logEvent('filter_click', { filterType: 'country', filterValue: v }, { utVersion: '2' }); }}
+              />
             )}
             {filters.riskTags.length > 0 && (
-              <select value={filterRiskTag} onChange={e => { const v = e.target.value; setFilterRiskTag(v); logEvent('filter_apply', v ? { riskTag: v } : {}); logEvent('filter_click', { filterType: 'riskTag', filterValue: v }, { utVersion: '2' }); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '8px', border: '1px solid #e2e8f0', fontSize: '0.8rem', background: '#fff', cursor: 'pointer', color: '#475569' }}>
-                <option value="">위험</option>
-                {filters.riskTags.map(t => <option key={t} value={t}>{t}</option>)}
-              </select>
+              <FilterChip
+                label="위험"
+                value={filterRiskTag}
+                options={filters.riskTags.map(t => ({ value: t, label: t }))}
+                onChange={(v) => { setFilterRiskTag(v); logEvent('filter_apply', v ? { riskTag: v } : {}); logEvent('filter_click', { filterType: 'riskTag', filterValue: v }, { utVersion: '2' }); }}
+              />
             )}
           </div>
 
