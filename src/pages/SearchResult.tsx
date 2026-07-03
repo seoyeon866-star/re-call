@@ -60,7 +60,7 @@ export default function SearchResult() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box' }}>
-    <div style={{ maxWidth: '480px', margin: '0 auto', padding: '24px 16px 40px', boxSizing: 'border-box', overflowX: 'hidden' }}>
+    <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '24px 16px 40px', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
         <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '1.2rem' }}>
           <img src="/assets/icon_arrow.png" alt="back" style={{ width: '20px', height: '20px' }} />

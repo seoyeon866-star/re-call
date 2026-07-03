@@ -56,7 +56,7 @@ export default function Home() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box' }}>
-      <div style={{ maxWidth: '480px', margin: '0 auto', padding: '32px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <h1 style={{ fontSize: 'clamp(1.8rem, 7vw, 2.4rem)', margin: 0, fontWeight: 700, letterSpacing: '-0.5px' }}>Re:call</h1>
           <p style={{ color: '#94a3b8', margin: '4px 0 0', fontSize: 'clamp(0.8rem, 3vw, 0.9rem)' }}>
@@ -64,6 +64,7 @@ export default function Home() {
           </p>
         </div>
 
+        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
         <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
           <div style={{ position: 'relative' }}>
             <input
@@ -74,7 +75,7 @@ export default function Home() {
               style={{
                 width: '100%', padding: 'clamp(10px, 3vw, 14px) clamp(36px, 10vw, 48px) clamp(10px, 3vw, 14px) clamp(40px, 11vw, 52px)',
                 fontSize: 'clamp(0.85rem, 3.5vw, 1rem)',
-                border: '2px solid #54B8DB', borderRadius: 'clamp(10px, 3vw, 14px)', outline: 'none',
+                border: '2px solid #54B8DB', borderRadius: '999px', outline: 'none',
                 boxSizing: 'border-box', background: '#fff',
               }}
             />
@@ -120,6 +121,7 @@ export default function Home() {
             ))}
           </div>
         </section>
+        </div>
 
         <section>
           <h3 style={{ fontSize: 'clamp(0.85rem, 2.5vw, 18px)', fontWeight: 600, color: '#64748b', margin: '0 0 12px' }}>최근 등록된 리콜</h3>

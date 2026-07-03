@@ -66,7 +66,7 @@ export default function ProductDetail() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box', overflowX: 'hidden' }}>
-      <div style={{ maxWidth: '480px', margin: '0 auto' }}>
+      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
       {/* ── Header ── */}
       <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #e2e8f0' }}>
         <button onClick={() => navigate(-1)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#54B8DB', fontSize: '0.9rem', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '4px', padding: 0 }}>
