@@ -39,3 +39,17 @@ img {
 .search-item-img img {
   transition: transform 0.2s ease;
 }
+
+.cat-icon-bg {
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: transparent;
+  transition: background-color 0.2s ease;
+}
+.category-btn:hover .cat-icon-bg {
+  background: #F1F1F1;
+}
