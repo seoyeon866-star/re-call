@@ -205,13 +205,11 @@ export default function SearchResult() {
                 <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: '4px' }}>
                   {(() => { const parsed = parseProductName(item.productNm); const brand = parsed?.brand || (item.makr && item.makr !== '-' ? item.makr : ''); return (
                     <div style={{ margin: 0 }}>
-                      {brand && <p style={{ margin: 0, fontSize: '0.68rem', color: '#94a3b8', lineHeight: 1.2 }}>{brand}</p>}
-                      <h3 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, lineHeight: 1.3, color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: brand ? 1 : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{parsed?.product || item.productNm}</h3>
+                      {brand && <p style={{ margin: 0, fontSize: '14px', fontWeight: 700, color: '#1e293b', lineHeight: 1.2 }}>{brand}</p>}
+                      <p style={{ margin: 0, fontSize: '14px', fontWeight: 400, lineHeight: 1.3, color: '#1e293b', wordBreak: 'break-word', display: '-webkit-box', WebkitLineClamp: brand ? 1 : 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{parsed?.product || item.productNm}</p>
                     </div>
                   )})()}
                   <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center', marginTop: '2px' }}>
-                    <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#dbeafe', color: '#3b82f6' }}>{item.category}</span>
-                    {item.recallSe && <span style={{ fontSize: '0.68rem', padding: '2px 8px', borderRadius: '6px', background: '#fee2e2', color: '#ef4444' }}>{item.recallSe}</span>}
                     {item.riskTags.slice(0, 2).map(tag => (
                       <span key={tag} style={{ fontSize: '12px', padding: '2px 4px', borderRadius: '6px', background: '#FCEBEA', color: '#E63429', display: 'inline-flex', alignItems: 'center', gap: '2px', fontWeight: 600 }}>
                         {RISK_ICONS[tag] && <img src={RISK_ICONS[tag]} alt={tag} style={{ width: '12px', height: '12px' }} />}
