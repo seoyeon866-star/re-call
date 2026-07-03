@@ -86,3 +86,10 @@ export async function fetchRelatedRecalls(recallSn: string): Promise<RecallItem[
   })
   return (data as any).items || []
 }
+
+export async function fetchRecallById(recallSn: string): Promise<RecallItem | null> {
+  const { data } = await axios.get('/api/recalls', {
+    params: { recallSn },
+  })
+  return (data as any).item || null
+}

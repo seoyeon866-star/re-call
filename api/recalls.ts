@@ -257,7 +257,17 @@ async function queryDBRelated(recallSn: string) {
 
 export default async function handler(req: any, res: any) {
   try {
-    const { q, category, recent, related } = req.query || {};
+    const { q, category, recent, related, recallSn } = req.query || {};
+
+    // Single recall by recallSn
+    if (recallSn) {
+      const sb = getSupabase();
+      if (sb) {
+        const { data, error } = await sb.from('recalls').select('*').eq('recall_sn', recallSn).maybeSingle();
+        if (!error && data) return res.json({ item: toClient(data), source: 'db' });
+      }
+      return res.json({ item: null, source: 'db' });
+    }
 
     // Related recalls
     if (related) {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useLocation, Link, useNavigate } from 'react-router-dom'
-import { getRecallImages, handleImgError, fetchRelatedRecalls } from '../api/consumerRecall'
+import { useLocation, useParams, Link, useNavigate } from 'react-router-dom'
+import { getRecallImages, handleImgError, fetchRelatedRecalls, fetchRecallById } from '../api/consumerRecall'
 import { buildRecallWithMeta, parseProductName, RISK_ICONS, type RecallWithMeta } from '../lib/classify'
 import { logEvent } from '../lib/analytics'
 
@@ -26,16 +26,29 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 
 export default function ProductDetail() {
   const location = useLocation()
+  const { id } = useParams()
   const data = location.state as { items: any[]; fromQuery?: string } | null
 
   const [altItems, setAltItems] = useState<AltProduct[]>([])
   const [relatedItems, setRelatedItems] = useState<RecallWithMeta[]>([])
+  const [fetchedItem, setFetchedItem] = useState<any>(null)
+
+  const navigate = useNavigate()
 
   const item: RecallWithMeta | null = data?.items?.[0]
     ? buildRecallWithMeta(data.items[0])
+    : fetchedItem
+    ? buildRecallWithMeta(fetchedItem)
     : null
 
-  const navigate = useNavigate()
+  useEffect(() => {
+    if (data?.items?.[0]) return
+    if (id) {
+      fetchRecallById(id).then(item => {
+        if (item) setFetchedItem(item)
+      })
+    }
+  }, [id])
 
   useEffect(() => {
     if (!item) return
