@@ -11,8 +11,8 @@ const POPULAR_PRODUCTS = [
   { recallSn: 'RCLL_000000000601697', productNm: '라부부 COCA-COLA 시리즈 - 랜덤박스 장난감', makr: '중국', recallImgUrls: '/assets/products/RCLL_000000000601697.jpg', category: '키즈', link: '/recall/RCLL_000000000601697' },
   { recallSn: 'RCLL_000000000562698', productNm: '하다라보 고쿠쥰 페이스 워시 폼 클렌저', makr: '하다라보', recallImgUrls: '/assets/products/RCLL_000000000562698.jpeg', category: '뷰티·헬스', link: '/recall/RCLL_000000000562698' },
   { recallSn: 'RCLL_000000000581480', productNm: '스탠리 1913 스위치백 텀블러', makr: 'Stanley', recallImgUrls: '/assets/products/RCLL_000000000581480.jpeg', category: '생활용품', link: '/recall/RCLL_000000000581480' },
-  { recallSn: '', productNm: '레인즈 텀블러', makr: '', recallImgUrls: '', category: '생활용품', link: '' },
-  { recallSn: '', productNm: '시세이도 크림', makr: 'Shiseido', recallImgUrls: '', category: '뷰티·헬스', link: '' },
+  { recallSn: 'RCLL_000000000601555', productNm: 'RAINS 단열 스테인리스 텀블러 450ml', makr: 'RAINS', recallImgUrls: '/assets/products/RCLL_000000000601555.jpg', category: '생활용품', link: '/recall/RCLL_000000000601555' },
+  { recallSn: 'RCLL_000000000579867', productNm: 'SHISEIDO Bio-performance 보습크림', makr: 'SHISEIDO', recallImgUrls: '/assets/products/RCLL_000000000579867.jpg', category: '뷰티·헬스', link: '/recall/RCLL_000000000579867' },
   { recallSn: 'RCLL_000000000563629', productNm: 'Solaray 리포솜 종합비타민 영양제', makr: 'Solaray', recallImgUrls: '/assets/products/RCLL_000000000563629.jpg', category: '식품·키친', link: '/recall/RCLL_000000000563629' },
 ]
 
