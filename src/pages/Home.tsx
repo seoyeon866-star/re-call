@@ -46,7 +46,7 @@ export default function Home() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', boxSizing: 'border-box' }}>
+    <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto', padding: '32px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
         <div style={{ textAlign: 'center', marginBottom: '28px' }}>
           <h1 style={{ fontSize: 'clamp(1.8rem, 7vw, 2.4rem)', margin: 0, fontWeight: 700, letterSpacing: '-0.5px' }}>Re:call</h1>
@@ -71,10 +71,11 @@ export default function Home() {
             />
             {query && (
               <button type="button" onClick={() => setQuery('')} style={{
-                position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                position: 'absolute', right: '8px', top: 0, bottom: 0,
+                background: 'none', border: 'none', cursor: 'pointer', padding: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                <img src="/assets/icon_deleteKeyword.png" alt="clear" style={{ width: '20px', height: '20px' }} />
+                <img src="/assets/icon_deleteKeyword.png" alt="clear" style={{ width: '24px', height: '24px' }} />
               </button>
             )}
           </div>
@@ -116,7 +117,7 @@ export default function Home() {
         <section>
           <h3 style={{ fontSize: '0.85rem', fontWeight: 600, color: '#64748b', margin: '0 0 12px' }}>최근 등록된 리콜</h3>
           {loading && (
-            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px' }}>
+            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px' }} className="hide-scrollbar">
               {[1,2,3,4,5].map(i => (
                 <div key={i} style={{ width: 'clamp(130px, 38vw, 170px)', borderRadius: '12px', background: '#fff', flexShrink: 0, aspectRatio: '2/3' }} />
               ))}
@@ -125,7 +126,7 @@ export default function Home() {
           {!loading && recentRecalls.length === 0 && (
             <p style={{ color: '#94a3b8', fontSize: '0.85rem', textAlign: 'center', padding: '32px 0' }}>리콜 정보를 불러올 수 없습니다.</p>
           )}
-          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
             {recentRecalls.filter(item => getRecallImages(item).length > 0).map((item) => {
               const images = getRecallImages(item)
               return (

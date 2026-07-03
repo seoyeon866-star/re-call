@@ -65,7 +65,7 @@ export default function ProductDetail() {
   const images = getRecallImages(item)
 
   return (
-    <div style={{ minHeight: '100vh', boxSizing: 'border-box', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ maxWidth: '480px', margin: '0 auto' }}>
       {/* ── Header ── */}
       <div style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 10, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 16px', borderBottom: '1px solid #e2e8f0' }}>
@@ -154,7 +154,7 @@ export default function ProductDetail() {
         <div style={{ padding: '24px 16px 24px' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 4px' }}>관련 리콜 정보</h2>
           <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 16px' }}>같은 카테고리의 유사 리콜 제품입니다.</p>
-          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
             {relatedItems.map((rel) => {
               const relImages = getRecallImages(rel)
               return (
@@ -199,7 +199,7 @@ export default function ProductDetail() {
         <div style={{ padding: '24px 16px 32px' }}>
           <h2 style={{ fontSize: '1rem', fontWeight: 600, color: '#1e293b', margin: '0 0 4px' }}>대체상품 추천</h2>
           <p style={{ fontSize: '0.82rem', color: '#94a3b8', margin: '0 0 16px' }}>리콜 이력이 없는 유사 상품입니다.</p>
-          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
             {altItems.slice(0, 6).map((alt, idx) => (
               <a key={idx} href={alt.link} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'inherit', flexShrink: 0, width: 'clamp(120px, 35vw, 160px)' }}>
                 <div style={{ background: '#fff', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 1px 6px rgba(0,0,0,0.06)' }}>

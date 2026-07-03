@@ -59,7 +59,7 @@ export default function SearchResult() {
   }, [rawItems, sortBy, filterCountry, filterCategory, filterRiskTag])
 
   return (
-    <div style={{ minHeight: '100vh', boxSizing: 'border-box' }}>
+    <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box' }}>
     <div style={{ maxWidth: '480px', margin: '0 auto', padding: '24px 16px 40px', boxSizing: 'border-box', overflowX: 'hidden' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
         <Link to="/" style={{ textDecoration: 'none', color: '#54B8DB', fontSize: '1.2rem' }}>
@@ -92,7 +92,7 @@ export default function SearchResult() {
 
       {!loading && rawItems.length > 0 && (
         <>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }}>
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', overflowX: 'auto', paddingBottom: '4px', WebkitOverflowScrolling: 'touch' }} className="hide-scrollbar">
             <div style={{ display: 'flex', gap: '6px', flexShrink: 0, alignItems: 'center', borderRadius: '10px', padding: '4px 8px' }}>
               <span style={{ fontSize: '0.75rem', color: '#64748b', whiteSpace: 'nowrap' }}>총 {items.length}건</span>
             </div>
