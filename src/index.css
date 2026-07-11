@@ -79,13 +79,13 @@ img {
 
 .cat-grid {
   display: flex;
-  justify-content: center;
-  gap: 30px;
+  justify-content: space-between;
+  gap: 12px;
 }
 @media (max-width: 768px) {
   .cat-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 16px 8px;
+    gap: 20px 12px;
   }
 }
