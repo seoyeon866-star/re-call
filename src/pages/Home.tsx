@@ -57,15 +57,9 @@ export default function Home() {
   return (
     <div style={{ minHeight: '100vh', background: '#F4FBFD', boxSizing: 'border-box' }}>
       <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '32px 16px', boxSizing: 'border-box', overflowX: 'hidden' }}>
-        <div style={{ textAlign: 'center', marginBottom: '28px' }}>
-          <h1 style={{ fontSize: 'clamp(1.8rem, 7vw, 2.4rem)', margin: 0, fontWeight: 700, letterSpacing: '-0.5px' }}>Re:call</h1>
-          <p style={{ color: '#94a3b8', margin: '4px 0 0', fontSize: 'clamp(0.8rem, 3vw, 0.9rem)' }}>
-            해외직구 리콜 정보 탐색
-          </p>
-        </div>
-
-        <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        <form onSubmit={handleSubmit} style={{ marginBottom: '24px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 'clamp(12px, 2vw, 20px)', marginBottom: '28px' }}>
+          <img src="/radar.svg" alt="Radar" style={{ height: 'clamp(22px, 5vw, 30px)', width: 'auto', flexShrink: 0 }} />
+          <form onSubmit={handleSubmit} style={{ flex: 1, minWidth: 0 }}>
           <div style={{ position: 'relative' }}>
             <input
               type="text"
@@ -94,6 +88,7 @@ export default function Home() {
             )}
           </div>
         </form>
+        </div>
 
         <section style={{ marginBottom: '24px' }}>
           <h3 style={{ fontSize: 'clamp(18px, 2.5vw, 18px)', fontWeight: 700, color: '#1B2325', margin: '0 0 10px' }}>추천 검색어</h3>
@@ -200,7 +195,6 @@ export default function Home() {
             })}
           </div>
         </section>
-        </div>
       </div>
     </div>
   )
